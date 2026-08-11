@@ -1,5 +1,22 @@
 # Changelog
 
+## [8.0.0](https://github.com/supabase-community/supabase-csharp/compare/v7.4.0...v8.0.0) (2026-08-11)
+
+
+### ⚠ BREAKING CHANGES
+
+* packages now target netstandard2.1 instead of netstandard2.0. .NET Framework consumers (netstandard2.0 is its ceiling) and pre-netstandard2.1 runtimes (Mono <6.4, older Xamarin/Unity) can no longer reference these packages and must move to a netstandard2.1-capable target (.NET Core 3.0+/.NET 5+).
+* **postgrest:** IPostgrestTable.Delete(QueryOptions?, CancellationToken) and its Table implementation now return Task<ModeledResponse> instead of Task. await table.Delete() is unaffected; code that assigns the result to Task or captures the method group must be recompiled/adjusted.
+
+### Bug Fixes
+
+* **postgrest:** return deleted rows from parameterless Delete ([#342](https://github.com/supabase-community/supabase-csharp/issues/342)) ([a7ef38c](https://github.com/supabase-community/supabase-csharp/commit/a7ef38cedd849c7ad0994140b936c7b62b7644e6)), closes [#334](https://github.com/supabase-community/supabase-csharp/issues/334)
+
+
+### Build System
+
+* retarget packages to netstandard2.1 ([#344](https://github.com/supabase-community/supabase-csharp/issues/344)) ([41ac485](https://github.com/supabase-community/supabase-csharp/commit/41ac485682af185c12904b451a72b28039b21eaa))
+
 ## [1.6.0](https://github.com/supabase-community/supabase-csharp/compare/v1.5.0...v1.6.0) (2026-08-07)
 
 
