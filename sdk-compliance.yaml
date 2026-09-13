@@ -5,7 +5,7 @@ features:
 
   auth.sign_in.sign_up:
     status: partially_implemented
-    note: "API mirrors signUp, but on a session-returning sign-up (confirmations off) C# does NOT adopt the session — CurrentUser/CurrentSession stay null, so 'signed up' != 'signed in' as in JS."
+    note: "A confirmed sign-up adopts the session, but the request cannot carry the PKCE code challenge or a CAPTCHA token."
     symbols:
       - Client.SignUp
   auth.sign_in.sign_in_with_password:
@@ -106,7 +106,8 @@ features:
     symbols:
       - User.Identities
   auth.mfa.enroll:
-    status: implemented
+    status: partially_implemented
+    note: "TOTP only; MfaEnrollParams has no phone field, so phone factors cannot be enrolled."
     symbols:
       - Client.Enroll
   auth.mfa.challenge:
@@ -138,8 +139,8 @@ features:
     symbols:
       - AdminClient.CreateUser
   auth.admin.delete_user:
-    status: partially_implemented
-    note: "Hard-delete only; no shouldSoftDelete flag (JS deleteUser(id, shouldSoftDelete))."
+    status: implemented
+    note: "Optional shouldSoftDelete flag; defaults to a hard delete."
     symbols:
       - AdminClient.DeleteUser
   auth.admin.update_user:
@@ -188,7 +189,7 @@ features:
     status: implemented
     symbols:
       - SupabaseOptions.SessionHandler
-      - Client.SetPersistence
+      - GotrueClient.SetPersistence
   client.session_management.persist_session:
     status: partially_implemented
     note: "No boolean persist toggle; in-memory-only behavior is achievable only by supplying a no-op IGotrueSessionPersistence handler."
@@ -360,7 +361,8 @@ features:
     symbols:
       - Table.Range
   database.using_modifiers.single_row:
-    status: implemented
+    status: partially_implemented
+    note: "Single() returns null on zero rows and throws on more than one, so it matches maybeSingle rather than single."
     symbols:
       - Table.Single
   database.using_modifiers.request_cancellation:
@@ -404,8 +406,8 @@ features:
       - InvokeFunctionOptions.FunctionRegion
       - FunctionRegion
   functions.invocation.timeout:
-    status: partially_implemented
-    note: "Per-invoke HttpTimeout exists, but it is not composable with a caller-supplied cancellation signal (Invoke accepts no CancellationToken)."
+    status: implemented
+    note: "Per-invoke HttpTimeout is linked with the caller-supplied CancellationToken; either one cancels the request."
     symbols:
       - InvokeFunctionOptions.HttpTimeout
 
@@ -499,7 +501,7 @@ features:
       - RealtimePresence.Untrack
   realtime.presence.presence_state:
     status: partially_implemented
-    note: "Typed CurrentState/LastState exist, but the initial presence snapshot is dropped, so any client that joins after others undercounts everyone — a behavioral gap, not just a shape gap."
+    note: "Initial snapshot seeds CurrentState, but a diff replaces a key's metas instead of merging and a leave drops the whole key."
     symbols:
       - RealtimePresence.CurrentState
       - RealtimePresence.LastState
@@ -581,7 +583,7 @@ features:
       - StorageFileApi.Remove
   storage.file_buckets.get_public_url:
     status: implemented
-    note: "Transform + download options present. Footgun: passing an empty TransformOptions() routes to the image-render endpoint instead of the plain object URL."
+    note: "Transform + download options present. An empty TransformOptions() counts as no transform and returns the plain object URL."
     symbols:
       - StorageFileApi.GetPublicUrl
   storage.file_buckets.create_signed_url:
