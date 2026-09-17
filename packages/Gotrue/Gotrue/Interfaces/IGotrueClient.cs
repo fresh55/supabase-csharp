@@ -4,6 +4,7 @@ using System;
 using System.Threading;
 using System.Threading.Tasks;
 using Supabase.Core.Interfaces;
+using Supabase.Gotrue.Claims;
 using Supabase.Gotrue.Exceptions;
 using Supabase.Gotrue.Mfa;
 using static Supabase.Gotrue.Constants;
@@ -497,6 +498,16 @@ public interface IGotrueClient<TUser, TSession> : IGettableHeaders
     /// <param name="jwt">A valid JWT. Must be a JWT that originates from a user.</param>
     /// <returns></returns>
     Task<TUser?> GetUser(string jwt);
+
+    /// <summary>
+    ///     Reads the claims of a JWT, verifying it against the server's JSON Web Key Set locally when the
+    ///     signing key is asymmetric and through <see cref="GetUser" /> otherwise.
+    /// </summary>
+    /// <param name="jwt">The token to read. Defaults to the current session's access token.</param>
+    /// <param name="options">Set <see cref="GetClaimsOptions.AllowExpired" /> to skip the local exp check.</param>
+    /// <param name="cancellationToken"></param>
+    /// <returns></returns>
+    Task<GetClaimsResponse> GetClaimsAsync(string? jwt = null, GetClaimsOptions? options = null, CancellationToken cancellationToken = default);
 
     /// <summary>
     ///     Posts messages and exceptions to the debug listener. This is particularly useful for sorting
