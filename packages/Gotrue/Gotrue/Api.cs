@@ -819,7 +819,7 @@ public class Api : IGotrueApi<User, Session>
     public Task<Settings?> Settings() => this.MakeRequestAsync<Settings>(HttpMethod.Get, $"{this.Url}/settings", null, this.Headers);
 
     /// <summary>
-    /// Calls the GoTrue server for the JSON Web Key Set its JWTs are signed with.
+    /// Gets the server's public keys for verifying JWT signatures.
     /// </summary>
     /// <param name="cancellationToken"></param>
     /// <returns></returns>

@@ -500,8 +500,8 @@ public interface IGotrueClient<TUser, TSession> : IGettableHeaders
     Task<TUser?> GetUser(string jwt);
 
     /// <summary>
-    ///     Reads the claims of a JWT, verifying it against the server's JSON Web Key Set locally when the
-    ///     signing key is asymmetric and through <see cref="GetUser" /> otherwise.
+    ///     Verifies an access token and returns its claims. Uses local verification for RS256 and ES256
+    ///     when a matching public key is available; otherwise, uses server verification.
     /// </summary>
     /// <param name="jwt">The token to read. Defaults to the current session's access token.</param>
     /// <param name="options">Set <see cref="GetClaimsOptions.AllowExpired" /> to skip the local exp check.</param>

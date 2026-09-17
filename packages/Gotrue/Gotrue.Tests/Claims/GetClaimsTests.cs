@@ -115,7 +115,7 @@ public class GetClaimsTests
         await this.client.GetClaimsAsync(GenerateToken(credentials, FutureExpiry));
         using (new AssertionScope())
         {
-            this.server.CountReceivedRequests(JwksPath).Should().Be(jwksFetches, "only a token naming an asymmetric kid is worth a fetch");
+            this.server.CountReceivedRequests(JwksPath).Should().Be(jwksFetches, "JWKS lookup requires a supported algorithm and a key id");
             this.server.CountReceivedRequests(UserPath).Should().Be(1, "tokens without a local key require server verification");
         }
     }
@@ -125,7 +125,7 @@ public class GetClaimsTests
     {
         this.publishedKeys[0] = "null";
         await this.client.GetClaimsAsync(GenerateToken(this.publishedCredentials, FutureExpiry));
-        this.server.CountReceivedRequests(UserPath).Should().Be(1, "an unusable key set means no local key, as auth-js treats it");
+        this.server.CountReceivedRequests(UserPath).Should().Be(1, "a null key entry cannot be used for local verification");
     }
 
     [TestMethod]
@@ -206,7 +206,11 @@ public class GetClaimsTests
     [TestMethod]
     public async Task GetClaimsAsync_ShouldSkipNetwork_GivenSuppliedJwks()
     {
-        var options = new GetClaimsOptions { Jwks = new Jwks { Keys = new[] { JsonSerializer.Deserialize<Jwk>(this.publishedKeys[0])! } } };
+        var key = JsonSerializer.Deserialize<Jwk>(this.publishedKeys[0])!;
+        var options = new GetClaimsOptions
+        {
+            Jwks = new Jwks { Keys = new[] { key } },
+        };
         await this.client.GetClaimsAsync(GenerateToken(this.publishedCredentials, FutureExpiry), options);
         this.server.CountReceivedRequests().Should().Be(0, "supplied keys take precedence");
     }
