@@ -92,7 +92,6 @@ public class GetClaimsTests
             ["role"] = "authenticated",
             ["ROLE"] = "service_role",
             ["aud"] = new[] { "authenticated", "api" },
-            ["iat"] = EpochTime.GetIntDate(DateTime.UtcNow),
             ["exp"] = EpochTime.GetIntDate(FutureExpiry),
         });
         var response = await this.client.GetClaimsAsync(token);
@@ -153,9 +152,9 @@ public class GetClaimsTests
     [TestMethod]
     [DataRow(false)]
     [DataRow(true)]
-    public async Task GetClaimsAsync_ShouldThrowInvalidJwt_GivenTamperedSignature(bool allowExpired)
+    public async Task GetClaimsAsync_ShouldThrowInvalidJwt_GivenForeignSignature(bool allowExpired)
     {
-        var token = Tamper(GenerateToken(this.publishedCredentials, allowExpired ? PastExpiry : FutureExpiry));
+        var token = GenerateToken(GenerateSigningKey("ES256", "key-1").Credentials, allowExpired ? PastExpiry : FutureExpiry);
         var getClaims = () => this.client.GetClaimsAsync(token, new GetClaimsOptions { AllowExpired = allowExpired });
         using (new AssertionScope())
         {
@@ -270,13 +269,5 @@ public class GetClaimsTests
     {
         var handler = new JwtSecurityTokenHandler();
         return handler.WriteToken(new JwtSecurityToken(new JwtHeader(credentials), payload));
-    }
-
-    private static string Tamper(string token)
-    {
-        var signatureStart = token.LastIndexOf('.') + 1;
-        var signature = Base64UrlEncoder.DecodeBytes(token.Substring(signatureStart));
-        signature[0] ^= 1;
-        return token.Substring(0, signatureStart) + Base64UrlEncoder.Encode(signature);
     }
 }
