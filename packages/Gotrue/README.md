@@ -80,6 +80,20 @@ bool SaveSession(Session session)
 }
 ```
 
+## JWT claims
+
+`GetClaimsAsync` verifies an access token and returns its claims. It uses the current session's token
+unless you provide one. RS256 and ES256 tokens can be verified locally using cached public keys;
+otherwise, verification requires a request to the Auth server.
+
+```csharp
+var result = await client.GetClaimsAsync();
+var userId = result.Claims.Sub;
+
+// Verify an explicitly supplied access token.
+var incoming = await client.GetClaimsAsync(accessToken);
+```
+
 ## OAuth (PKCE flow)
 
 For third-party OAuth the PKCE flow is preferred. Configure a callback URL in the Supabase dashboard,
