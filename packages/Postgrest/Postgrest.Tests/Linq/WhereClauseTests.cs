@@ -165,6 +165,34 @@ public class WhereClauseTests
     }
 
     [TestMethod]
+    public void Where_ShouldUseColumnName_GivenBareNullableBooleanValueMember()
+    {
+        this.client.Table<NullableFlag>().Where(x => x.IsActive!.Value)
+            .GenerateUrl().Should().Be($"{BaseUrl}/nullable_flag?is_active=eq.True");
+    }
+
+    [TestMethod]
+    public void Where_ShouldUseColumnName_GivenNegatedNullableBooleanValueMember()
+    {
+        this.client.Table<NullableFlag>().Where(x => !x.IsActive!.Value)
+            .GenerateUrl().Should().Be($"{BaseUrl}/nullable_flag?is_active=not.eq.True");
+    }
+
+    [TestMethod]
+    public void Where_ShouldTranslateIntoNotIsNull_GivenNullableHasValueMember()
+    {
+        this.client.Table<NullableFlag>().Where(x => x.IsActive.HasValue)
+            .GenerateUrl().Should().Be($"{BaseUrl}/nullable_flag?is_active=not.is.null");
+    }
+
+    [TestMethod]
+    public void Where_ShouldTranslateIntoIsNull_GivenNegatedNullableHasValueMember()
+    {
+        this.client.Table<NullableFlag>().Where(x => !x.IsActive.HasValue)
+            .GenerateUrl().Should().Be($"{BaseUrl}/nullable_flag?is_active=is.null");
+    }
+
+    [TestMethod]
     public void Where_ShouldNestBooleanMember_GivenAnAndPredicate()
     {
         this.client.Table<KitchenSink>().Where(x => x.BooleanValue && x.IntValue > 3)
