@@ -172,6 +172,17 @@ public class ClientContractTests
     }
 
     [TestMethod]
+    public async Task Invoke_ShouldSendOptionContentType_GivenLowercaseHeaderName()
+    {
+        this.RespondWith(200, "ok");
+        await this.client.Invoke(FunctionName, options: new InvokeFunctionOptions
+        {
+            Headers = new Dictionary<string, string> { { "content-type", "text/plain" } }
+        });
+        this.HeaderOf("Content-Type").Should().Be("text/plain");
+    }
+
+    [TestMethod]
     public async Task Invoke_ShouldThrowFunctionsException_GivenServerError()
     {
         this.RespondWith(500, "internal boom");
