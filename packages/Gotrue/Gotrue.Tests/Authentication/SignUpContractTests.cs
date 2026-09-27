@@ -133,6 +133,16 @@ public class SignUpContractTests
     }
 
     [TestMethod]
+    [DataRow(Constants.SignUpType.Email, "captcha@example.com")]
+    [DataRow(Constants.SignUpType.Phone, "+15555550123")]
+    public async Task SignUp_ShouldSendTheCaptchaToken(Constants.SignUpType type, string identifier)
+    {
+        this.StubSignUp(PendingConfirmationSignUp);
+        await this.client.SignUp(type, identifier, Password, new SignUpOptions { CaptchaToken = "the-captcha" });
+        this.server.VerifySingleReceivedRequest().WithNestedJsonBody("gotrue_meta_security", "captcha_token", "the-captcha");
+    }
+
+    [TestMethod]
     public void SignUpWithPhone_ShouldThrowOnTheCall_GivenAnEmptyPhoneNumber()
     {
         // Not awaited: validation must throw on the call, not once the task is observed.

@@ -119,7 +119,7 @@ internal sealed class ReceivedRequest
     {
         this.request.Body.Should().NotBeNull("the request should have a body");
         var body = JsonNode.Parse(this.request.Body!)!.AsObject();
-        body[parent]?[field]?.GetValue<string>().Should().Be(expected);
+        ((string?) body[parent]?[field]).Should().Be(expected);
         return this;
     }
 
