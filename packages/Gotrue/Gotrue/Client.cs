@@ -303,8 +303,18 @@ public class Client : IGotrueClient<User, Session>
     public Task<Session?> SignInWithPassword(string email, string password) => this.SignIn(email, password);
 
     /// <inheritdoc />
-    public Task<Session?> SignInWithPassword(SignInType type, string identifier, string password, SignInWithPasswordOptions options) =>
-        this.SignIn(type, identifier, password, options);
+    public Task<Session?> SignInWithPassword(SignInType type, string identifier, string password, SignInWithPasswordOptions options)
+    {
+        if (type == SignInType.RefreshToken)
+        {
+            throw new ArgumentOutOfRangeException(nameof(type), type, null);
+        }
+        if (string.IsNullOrEmpty(password))
+        {
+            throw new GotrueException("Password not provided.", UserBadLogin);
+        }
+        return this.SignIn(type, identifier, password, options);
+    }
 
     /// <inheritdoc />
     public Task<Session?> SignIn(SignInType type, string identifierOrToken, string? password = null,
