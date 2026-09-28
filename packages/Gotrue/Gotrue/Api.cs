@@ -99,6 +99,11 @@ public class Api : IGotrueApi<User, Session>
             {
                 body.Add("data", options.Data);
             }
+
+            if (!string.IsNullOrEmpty(options.CaptchaToken))
+            {
+                body.Add("gotrue_meta_security", new Dictionary<string, string> { { "captcha_token", options.CaptchaToken! } });
+            }
         }
 
         return await this.PostSignUp(endpoint, body).ConfigureAwait(false);
@@ -398,6 +403,11 @@ public class Api : IGotrueApi<User, Session>
             if (options.Data != null)
             {
                 body.Add("data", options.Data);
+            }
+
+            if (!string.IsNullOrEmpty(options.CaptchaToken))
+            {
+                body.Add("gotrue_meta_security", new Dictionary<string, string> { { "captcha_token", options.CaptchaToken! } });
             }
         }
 

@@ -285,14 +285,20 @@ public partial class Client : IFunctionsClient
 
     private static HttpRequestMessage BuildRequestMessage(InvokeFunctionOptions options, Uri uri)
     {
-        var request = new HttpRequestMessage(options.HttpMethod, uri)
-        {
-            Content = new StringContent(JsonSerializer.Serialize(options.Body, SerializerOptions), Encoding.UTF8, "application/json")
-        };
+        var content = new StringContent(JsonSerializer.Serialize(options.Body, SerializerOptions), Encoding.UTF8, "application/json");
+        var request = new HttpRequestMessage(options.HttpMethod, uri) { Content = content };
 
         foreach (var kvp in options.Headers)
         {
-            request.Headers.TryAddWithoutValidation(kvp.Key, kvp.Value);
+            if (string.Equals(kvp.Key, "Content-Type", StringComparison.OrdinalIgnoreCase))
+            {
+                content.Headers.Remove("Content-Type");
+                content.Headers.TryAddWithoutValidation("Content-Type", kvp.Value);
+            }
+            else
+            {
+                request.Headers.TryAddWithoutValidation(kvp.Key, kvp.Value);
+            }
         }
 
         return request;
