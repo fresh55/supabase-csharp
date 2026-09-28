@@ -145,15 +145,18 @@ public class StatelessClient : IGotrueStatelessClient<User, Session>
     public Task<Session?> SignIn(string email, string password, StatelessClientOptions options) => this.SignIn(SignInType.Email, email, password, options);
 
     /// <inheritdoc />
-    public async Task<Session?> SignIn(SignInType type, string identifierOrToken, string? password = null, StatelessClientOptions? options = null)
+    public Task<Session?> SignIn(SignInType type, string identifierOrToken, string? password = null, StatelessClientOptions? options = null) =>
+        this.SignIn(type, identifierOrToken, password, options ?? new StatelessClientOptions(), new SignInWithPasswordOptions());
+
+    /// <inheritdoc />
+    public async Task<Session?> SignIn(SignInType type, string identifierOrToken, string? password, StatelessClientOptions options, SignInWithPasswordOptions signInOptions)
     {
-        options ??= new StatelessClientOptions();
         var api = this.GetApi(options);
         Session? session;
         switch (type)
         {
             case SignInType.Email:
-                session = await api.SignInWithEmail(identifierOrToken, password!);
+                session = await api.SignInWithEmail(identifierOrToken, password!, signInOptions).ConfigureAwait(false);
                 break;
             case SignInType.Phone:
                 if (string.IsNullOrEmpty(password))
@@ -161,7 +164,7 @@ public class StatelessClient : IGotrueStatelessClient<User, Session>
                     await api.SendMobileOTP(identifierOrToken);
                     return null;
                 }
-                session = await api.SignInWithPhone(identifierOrToken, password!);
+                session = await api.SignInWithPhone(identifierOrToken, password!, signInOptions).ConfigureAwait(false);
                 break;
             default: throw new ArgumentOutOfRangeException(nameof(type), type, null);
         }

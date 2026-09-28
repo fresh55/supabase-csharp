@@ -172,6 +172,11 @@ public interface IGotrueStatelessClient<TUser, TSession>
     Task<TSession?> SignIn(SignInType type, string identifierOrToken, string? password = null, StatelessClientOptions? options = null);
 
     /// <summary>
+    /// Log in an existing user with an email or phone and password.
+    /// </summary>
+    Task<TSession?> SignIn(SignInType type, string identifierOrToken, string? password, StatelessClientOptions options, SignInWithPasswordOptions signInOptions);
+
+    /// <summary>
     /// Sends a Magic email login link to the specified email.
     /// </summary>
     /// <param name="email"></param>

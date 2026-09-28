@@ -144,9 +144,19 @@ public class Api : IGotrueApi<User, Session>
     /// <param name="email"></param>
     /// <param name="password"></param>
     /// <returns></returns>
-    public Task<Session?> SignInWithEmail(string email, string password)
+    public Task<Session?> SignInWithEmail(string email, string password) => this.SignInWithEmail(email, password, new SignInWithPasswordOptions());
+
+    /// <summary>
+    /// Logs in an existing user using their email address.
+    /// </summary>
+    public Task<Session?> SignInWithEmail(string email, string password, SignInWithPasswordOptions options)
     {
         var body = new Dictionary<string, object> { { "email", email }, { "password", password } };
+        if (!string.IsNullOrEmpty(options.CaptchaToken))
+        {
+            body.Add("gotrue_meta_security", new Dictionary<string, string> { { "captcha_token", options.CaptchaToken! } });
+        }
+
         return this.MakeRequestAsync<Session>(HttpMethod.Post, $"{this.Url}/token?grant_type=password", body, this.Headers);
     }
 
@@ -420,13 +430,23 @@ public class Api : IGotrueApi<User, Session>
     /// <param name="phone">The phone number of the user.</param>
     /// <param name="password">The password of the user.</param>
     /// <returns></returns>
-    public Task<Session?> SignInWithPhone(string phone, string password)
+    public Task<Session?> SignInWithPhone(string phone, string password) => this.SignInWithPhone(phone, password, new SignInWithPasswordOptions());
+
+    /// <summary>
+    /// Logs in an existing user using their phone number and password.
+    /// </summary>
+    public Task<Session?> SignInWithPhone(string phone, string password, SignInWithPasswordOptions options)
     {
         var data = new Dictionary<string, object>
         {
             { "phone", phone },
             { "password", password }
         };
+        if (!string.IsNullOrEmpty(options.CaptchaToken))
+        {
+            data.Add("gotrue_meta_security", new Dictionary<string, string> { { "captcha_token", options.CaptchaToken! } });
+        }
+
         return this.MakeRequestAsync<Session>(HttpMethod.Post, $"{this.Url}/token?grant_type=password", data, this.Headers);
     }
 

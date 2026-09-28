@@ -31,6 +31,8 @@ public interface IGotrueApi<TUser, TSession> : IGettableHeaders
     Task<TSession?> SignInWithIdToken(Provider provider, string idToken, string? accessToken = null, string? nonce = null, string? captchaToken = null);
     Task<TSession?> SignInWithEmail(string email, string password);
     Task<TSession?> SignInWithPhone(string phone, string password);
+    Task<TSession?> SignInWithEmail(string email, string password, SignInWithPasswordOptions options);
+    Task<TSession?> SignInWithPhone(string phone, string password, SignInWithPasswordOptions options);
     Task<PasswordlessSignInState> SignInWithOtp(SignInWithPasswordlessEmailOptions options);
     Task<PasswordlessSignInState> SignInWithOtp(SignInWithPasswordlessPhoneOptions options);
     Task<TSession?> SignInAnonymously(SignInAnonymouslyOptions? options = null);

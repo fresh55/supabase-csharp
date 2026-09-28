@@ -116,3 +116,15 @@ Supabase.Gotrue.Interfaces.IGotrueApi<TUser, TSession>.GetUserAsync(string! jwt,
 Supabase.Gotrue.Interfaces.IGotrueClient<TUser, TSession>.GetClaimsAsync(string? jwt = null, Supabase.Gotrue.Claims.GetClaimsOptions? options = null, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<Supabase.Gotrue.Claims.GetClaimsResponse!>!
 Supabase.Gotrue.SignUpOptions.CaptchaToken.get -> string?
 Supabase.Gotrue.SignUpOptions.CaptchaToken.set -> void
+Supabase.Gotrue.Api.SignInWithEmail(string! email, string! password, Supabase.Gotrue.SignInWithPasswordOptions! options) -> System.Threading.Tasks.Task<Supabase.Gotrue.Session?>!
+Supabase.Gotrue.Api.SignInWithPhone(string! phone, string! password, Supabase.Gotrue.SignInWithPasswordOptions! options) -> System.Threading.Tasks.Task<Supabase.Gotrue.Session?>!
+Supabase.Gotrue.Client.SignInWithPassword(Supabase.Gotrue.Constants.SignInType type, string! identifier, string! password, Supabase.Gotrue.SignInWithPasswordOptions! options) -> System.Threading.Tasks.Task<Supabase.Gotrue.Session?>!
+Supabase.Gotrue.Interfaces.IGotrueApi<TUser, TSession>.SignInWithEmail(string! email, string! password, Supabase.Gotrue.SignInWithPasswordOptions! options) -> System.Threading.Tasks.Task<TSession?>!
+Supabase.Gotrue.Interfaces.IGotrueApi<TUser, TSession>.SignInWithPhone(string! phone, string! password, Supabase.Gotrue.SignInWithPasswordOptions! options) -> System.Threading.Tasks.Task<TSession?>!
+Supabase.Gotrue.Interfaces.IGotrueClient<TUser, TSession>.SignInWithPassword(Supabase.Gotrue.Constants.SignInType type, string! identifier, string! password, Supabase.Gotrue.SignInWithPasswordOptions! options) -> System.Threading.Tasks.Task<TSession?>!
+Supabase.Gotrue.Interfaces.IGotrueStatelessClient<TUser, TSession>.SignIn(Supabase.Gotrue.Constants.SignInType type, string! identifierOrToken, string? password, Supabase.Gotrue.StatelessClient.StatelessClientOptions! options, Supabase.Gotrue.SignInWithPasswordOptions! signInOptions) -> System.Threading.Tasks.Task<TSession?>!
+Supabase.Gotrue.SignInWithPasswordOptions
+Supabase.Gotrue.SignInWithPasswordOptions.CaptchaToken.get -> string?
+Supabase.Gotrue.SignInWithPasswordOptions.CaptchaToken.init -> void
+Supabase.Gotrue.SignInWithPasswordOptions.SignInWithPasswordOptions() -> void
+Supabase.Gotrue.StatelessClient.SignIn(Supabase.Gotrue.Constants.SignInType type, string! identifierOrToken, string? password, Supabase.Gotrue.StatelessClient.StatelessClientOptions! options, Supabase.Gotrue.SignInWithPasswordOptions! signInOptions) -> System.Threading.Tasks.Task<Supabase.Gotrue.Session?>!

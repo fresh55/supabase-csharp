@@ -240,6 +240,11 @@ public interface IGotrueClient<TUser, TSession> : IGettableHeaders
     Task<TSession?> SignInWithPassword(string email, string password);
 
     /// <summary>
+    ///     Log in an existing user with an email or phone and password.
+    /// </summary>
+    Task<TSession?> SignInWithPassword(SignInType type, string identifier, string password, SignInWithPasswordOptions options);
+
+    /// <summary>
     ///     Retrieves a <see cref="ProviderAuthState" /> to redirect to for signing in with a <see cref="Provider" />.
     ///     This will likely be paired with a PKCE flow (set in SignInOptions) - after redirecting the
     ///     user to the flow, you should pair with <see cref="ExchangeCodeForSession(string, string)" />

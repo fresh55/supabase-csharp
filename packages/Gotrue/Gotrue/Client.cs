@@ -303,8 +303,14 @@ public class Client : IGotrueClient<User, Session>
     public Task<Session?> SignInWithPassword(string email, string password) => this.SignIn(email, password);
 
     /// <inheritdoc />
-    public async Task<Session?> SignIn(SignInType type, string identifierOrToken, string? password = null,
-        string? scopes = null)
+    public Task<Session?> SignInWithPassword(SignInType type, string identifier, string password, SignInWithPasswordOptions options) =>
+        this.SignIn(type, identifier, password, options);
+
+    /// <inheritdoc />
+    public Task<Session?> SignIn(SignInType type, string identifierOrToken, string? password = null,
+        string? scopes = null) => this.SignIn(type, identifierOrToken, password, new SignInWithPasswordOptions());
+
+    private async Task<Session?> SignIn(SignInType type, string identifierOrToken, string? password, SignInWithPasswordOptions options)
     {
         using var activity = GotrueInstrumentation.Source.StartActivity(GotrueInstrumentation.Spans.SignIn);
         activity?.SetTag(GotrueInstrumentation.Tags.SignInType, type.ToString());
@@ -316,7 +322,7 @@ public class Client : IGotrueClient<User, Session>
         switch (type)
         {
             case SignInType.Email:
-                newSession = await this.api.SignInWithEmail(identifierOrToken, password!);
+                newSession = await this.api.SignInWithEmail(identifierOrToken, password!, options).ConfigureAwait(false);
                 await this.UpdateSessionAsync(newSession).ConfigureAwait(false);
                 break;
             case SignInType.Phone:
@@ -325,7 +331,7 @@ public class Client : IGotrueClient<User, Session>
                     await this.api.SendMobileOTP(identifierOrToken);
                     return null;
                 }
-                newSession = await this.api.SignInWithPhone(identifierOrToken, password!);
+                newSession = await this.api.SignInWithPhone(identifierOrToken, password!, options).ConfigureAwait(false);
                 await this.UpdateSessionAsync(newSession).ConfigureAwait(false);
                 break;
             case SignInType.RefreshToken:
