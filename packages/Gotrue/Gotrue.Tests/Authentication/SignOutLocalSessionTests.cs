@@ -61,6 +61,10 @@ public class SignOutLocalSessionTests
         this.server.Given(Request.Create().WithPath("/logout").UsingPost())
             .RespondWith(Response.Create().WithStatusCode(204));
         await this.client.SignOut(SignOutScope.Others);
-        this.client.CurrentSession.Should().NotBeNull("the others scope signs out every session except this one");
+        using (new AssertionScope())
+        {
+            this.client.CurrentSession.Should().NotBeNull("the others scope signs out every session except this one");
+            this.persistence.LoadSession().Should().NotBeNull();
+        }
     }
 }
