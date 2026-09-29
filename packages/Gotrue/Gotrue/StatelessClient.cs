@@ -181,9 +181,15 @@ public class StatelessClient : IGotrueStatelessClient<User, Session>
     /// <inheritdoc />
     public async Task<bool> SignOut(string accessToken, StatelessClientOptions options)
     {
-        var result = await this.GetApi(options).SignOut(accessToken);
-        result.ResponseMessage?.EnsureSuccessStatusCode();
+        await this.SignOut(accessToken, options, SignOutScope.Global).ConfigureAwait(false);
         return true;
+    }
+
+    /// <inheritdoc />
+    public async Task SignOut(string accessToken, StatelessClientOptions options, SignOutScope scope)
+    {
+        var result = await this.GetApi(options).SignOut(accessToken, scope).ConfigureAwait(false);
+        result.ResponseMessage?.EnsureSuccessStatusCode();
     }
 
     /// <inheritdoc />
