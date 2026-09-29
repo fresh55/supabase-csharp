@@ -393,6 +393,22 @@ public class StorageFileApiContractTests
     }
 
     [TestMethod]
+    public async Task List_ShouldSurfaceStorageException_GivenNonJsonSuccessBody()
+    {
+        const string body = "<html><body>502 Bad Gateway</body></html>";
+        this.server.Given(Request.Create().WithPath($"/storage/v1/object/list/{Bucket}").UsingPost())
+            .RespondWith(Response.Create().WithStatusCode(200).WithBody(body));
+        var act = () => this.client.From(Bucket).List();
+        var exception = (await act.Should().ThrowAsync<SupabaseStorageException>(
+            "storage-js reports a non-JSON 2xx body as a StorageUnknownError, not a raw parse error")).Which;
+        using (new AssertionScope())
+        {
+            exception.StatusCode.Should().Be(200);
+            exception.Content.Should().Be(body);
+        }
+    }
+
+    [TestMethod]
     public async Task UploadToSignedUrl_ShouldForwardMetadataAndCustomHeaders_GivenFileOptions()
     {
         var signedUrl = new UploadSignedUrl(

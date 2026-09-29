@@ -74,6 +74,21 @@ internal static class Helpers
         var response = await MakeRequestAsync(httpClient, retry, method, url, data, headers, cancellationToken);
         var content = await response.Content.ReadAsStringAsync();
 
+        // A proxy can answer 2xx with an HTML page; JSON that doesn't fit T still throws below.
+        try
+        {
+            JsonDocument.Parse(content).Dispose();
+        }
+        catch (JsonException e)
+        {
+            throw new SupabaseStorageException(e.Message, e)
+            {
+                Content = content,
+                Response = response,
+                StatusCode = (int) response.StatusCode,
+            };
+        }
+
         return JsonSerializer.Deserialize<T>(content, SerializerOptions);
     }
 
