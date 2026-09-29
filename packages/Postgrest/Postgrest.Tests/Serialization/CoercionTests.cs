@@ -27,18 +27,16 @@ public class CoercionTests
         // Scope to the seeded row; other tests insert kitchen_sink rows (issue #300).
         var existing = await client.Table<KitchenSink>()
             .Where(x => x.Id == new Guid("f3ff356d-5803-43a7-b125-ba10cf10fdcd")).Single();
-        if (existing != null)
+        existing.Should().NotBeNull();
+        using (new AssertionScope())
         {
-            using (new AssertionScope())
-            {
-                existing.FloatValue.Should().Be(99999.0f);
-                existing.DoubleValue.Should().Be(99999.0d);
-                existing.ListOfStrings.Should().BeEquivalentTo("set", "of", "strings");
-                existing.DateTimePosInfinity.Should().Be(DateTime.MaxValue);
-                existing.DateTimeNegInfinity.Should().Be(DateTime.MinValue);
-                existing.ListOfFloats.Should().BeEquivalentTo(new List<float> { 10.0f, 12.0f });
-                existing.IntRange.Should().Be(new IntRange(20, 50));
-            }
+            existing!.FloatValue.Should().Be(99999.0f);
+            existing.DoubleValue.Should().Be(99999.0d);
+            existing.ListOfStrings.Should().BeEquivalentTo("set", "of", "strings");
+            existing.DateTimePosInfinity.Should().Be(DateTime.MaxValue);
+            existing.DateTimeNegInfinity.Should().Be(DateTime.MinValue);
+            existing.ListOfFloats.Should().BeEquivalentTo(new List<float> { 10.0f, 12.0f });
+            existing.IntRange.Should().Be(new IntRange(20, 50));
         }
         var model = new KitchenSink
         {
