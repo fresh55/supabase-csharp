@@ -142,7 +142,7 @@ public partial class Client : IFunctionsClient
 
         var content = await response.Content.ReadAsStringAsync();
 
-        return JsonSerializer.Deserialize<T>(content, SerializerOptions);
+        return string.IsNullOrEmpty(content) ? default : JsonSerializer.Deserialize<T>(content, SerializerOptions);
     }
 
     /// <summary>

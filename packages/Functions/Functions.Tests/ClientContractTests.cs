@@ -61,6 +61,14 @@ public class ClientContractTests
     }
 
     [TestMethod]
+    public async Task Invoke_ShouldReturnNull_GivenTypedInvokeAndEmptyBody()
+    {
+        this.RespondWith(204, "");
+        var result = await this.client.Invoke<Dictionary<string, string>>(FunctionName);
+        result.Should().BeNull("an empty body has nothing to deserialize (issue #461)");
+    }
+
+    [TestMethod]
     public async Task RawInvoke_ShouldReturnReadableContent()
     {
         this.RespondWith(200, "raw-payload");
