@@ -57,7 +57,7 @@ public class ApiTransportContractTests
 
         await client.RefreshToken("access", "refresh");
 
-        client.CurrentSession?.AccessToken.Should().Be("new-token", "the retryable 503 should be retried until the second response succeeds");
+        client.CurrentSession!.AccessToken.Should().Be("new-token", "the retryable 503 should be retried until the second response succeeds");
         client.Shutdown();
     }
 
