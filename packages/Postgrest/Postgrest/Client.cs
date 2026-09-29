@@ -108,7 +108,10 @@ public class Client : IPostgrestClient
     {
         var response = await this.Rpc(procedureName, parameters);
 
-        return string.IsNullOrEmpty(response.Content) ? default : JsonSerializer.Deserialize<TModeledResponse>(response.Content!, SerializerSettings(this.Options));
+        if (string.IsNullOrEmpty(response.Content)) return default;
+
+        Helpers.ParseJsonBody(response);
+        return JsonSerializer.Deserialize<TModeledResponse>(response.Content!, SerializerSettings(this.Options));
     }
 
     /// <inheritdoc />

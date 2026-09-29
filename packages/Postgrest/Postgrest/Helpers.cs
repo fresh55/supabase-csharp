@@ -176,6 +176,26 @@ internal static class Helpers
     }
 
     /// <summary>
+    /// Parses a 2xx body and throws a PostgrestException when it isn't JSON, e.g. a proxy's HTML page.
+    /// </summary>
+    internal static JsonNode? ParseJsonBody(BaseResponse response)
+    {
+        try
+        {
+            return JsonNode.Parse(response.Content!);
+        }
+        catch (JsonException e)
+        {
+            throw new PostgrestException(response.Content, e)
+            {
+                Content = response.Content,
+                Response = response.ResponseMessage,
+                StatusCode = (int) (response.ResponseMessage?.StatusCode ?? 0)
+            };
+        }
+    }
+
+    /// <summary>
     /// Prepares the request with appropriate HTTP headers expected by Postgrest.
     /// </summary>
     /// <param name="method"></param>

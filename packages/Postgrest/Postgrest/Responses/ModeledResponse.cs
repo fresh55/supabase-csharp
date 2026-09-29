@@ -38,7 +38,7 @@ public class ModeledResponse<T> : BaseResponse where T : BaseModel, new()
 
         if (!shouldParse || string.IsNullOrEmpty(this.Content)) return;
 
-        var token = JsonNode.Parse(this.Content!);
+        var token = Helpers.ParseJsonBody(this);
 
         switch (token)
         {
