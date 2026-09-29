@@ -28,7 +28,7 @@ public class PostgresChangesOptionsTests
     public void Table_ShouldBeSerialized_GivenProvided()
     {
         var json = JsonSerializer.Serialize(new PostgresChangesOptions("public", "todos"));
-        JsonNode.Parse(json)!["table"]?.GetValue<string>().Should().Be("todos");
+        JsonNode.Parse(json)!["table"]!.GetValue<string>().Should().Be("todos");
     }
 
     [TestMethod]
