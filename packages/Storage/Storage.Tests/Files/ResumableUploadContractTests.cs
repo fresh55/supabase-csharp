@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Globalization;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using FluentAssertions;
@@ -9,6 +10,7 @@ using Supabase.Storage;
 using WireMock.RequestBuilders;
 using WireMock.ResponseBuilders;
 using WireMock.Server;
+using FileOptions = Supabase.Storage.FileOptions;
 
 namespace Storage.Tests.Files
 {
@@ -75,6 +77,17 @@ namespace Storage.Tests.Files
                 this.Paths("POST").Should().BeEmpty("a cached session must be resumed, never re-created");
                 this.Paths("PATCH").Should().Contain(cachedSession, "the resume must patch the cached session URL");
             }
+        }
+
+        [TestMethod]
+        public async Task UploadOrResume_ShouldCloseTheLocalFile()
+        {
+            var path = Path.GetTempFileName();
+            await File.WriteAllBytesAsync(path, Payload);
+            await this.client.From(Bucket).UploadOrResume(path, FileName, new FileOptions());
+            FluentActions.Invoking(() => File.Open(path, FileMode.Open, FileAccess.Read, FileShare.None).Dispose())
+                .Should().NotThrow("the caller must be able to move or delete the file after the upload");
+            File.Delete(path);
         }
 
         private void StubTusEndpoints()

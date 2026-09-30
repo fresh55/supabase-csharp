@@ -253,7 +253,7 @@ internal static class HttpClientProgress
         }
     }
 
-    public static Task<HttpResponseMessage> UploadOrContinueFileAsync(
+    public static async Task<HttpResponseMessage> UploadOrContinueFileAsync(
         this HttpClient client,
         Uri uri,
         string filePath,
@@ -263,8 +263,8 @@ internal static class HttpClientProgress
         CancellationToken cancellationToken = default
     )
     {
-        var fileStream = new FileStream(filePath, mode: FileMode.Open, FileAccess.Read);
-        return ResumableUploadAsync(
+        using var fileStream = new FileStream(filePath, mode: FileMode.Open, FileAccess.Read);
+        return await ResumableUploadAsync(
             client,
             uri,
             fileStream,
@@ -272,7 +272,7 @@ internal static class HttpClientProgress
             headers,
             progress,
             cancellationToken
-        );
+        ).ConfigureAwait(false);
     }
 
     public static Task<HttpResponseMessage> UploadOrContinueByteAsync(
