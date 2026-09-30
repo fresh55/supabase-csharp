@@ -176,13 +176,13 @@ internal static class Helpers
     }
 
     /// <summary>
-    /// Parses a 2xx body and throws a PostgrestException when it isn't JSON, e.g. a proxy's HTML page.
+    /// Deserializes a 2xx body and throws a PostgrestException when it can't be read, e.g. a proxy's HTML page.
     /// </summary>
-    internal static JsonNode? ParseJsonBody(BaseResponse response)
+    internal static T? DeserializeBody<T>(BaseResponse response, JsonSerializerOptions options)
     {
         try
         {
-            return JsonNode.Parse(response.Content!);
+            return JsonSerializer.Deserialize<T>(response.Content!, options);
         }
         catch (JsonException e)
         {
