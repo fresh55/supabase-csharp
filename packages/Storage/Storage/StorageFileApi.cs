@@ -392,17 +392,19 @@ public class StorageFileApi : IStorageFileApi<FileObject>
         if (inferContentType)
             options.ContentType = MimeMapping.MimeUtility.GetMimeMapping(localFilePath);
 
-        this.StorageHeader.Add("Authorization", $"Bearer {signedUrl.Token}");
-        this.StorageHeader.Add("cache-control", $"max-age={options.CacheControl}");
-        this.StorageHeader.Add("content-type", options.ContentType);
+        var headers = new Header();
+        headers.Add(this.StorageHeader.Get());
+        headers.Add("Authorization", $"Bearer {signedUrl.Token}");
+        headers.Add("cache-control", $"max-age={options.CacheControl}");
+        headers.Add("content-type", options.ContentType);
 
         if (options.Upsert)
-            this.StorageHeader.Add("x-upsert", options.Upsert.ToString().ToLower());
+            headers.Add("x-upsert", options.Upsert.ToString().ToLower());
 
         if (options.Metadata != null)
-            this.StorageHeader.Add("x-metadata", ParseMetadata(options.Metadata));
+            headers.Add("x-metadata", ParseMetadata(options.Metadata));
 
-        options.Headers?.ToList().ForEach(x => this.StorageHeader.Add(x.Key, x.Value));
+        options.Headers?.ToList().ForEach(x => headers.Add(x.Key, x.Value));
 
         var progress = new Progress<float>();
 
@@ -412,9 +414,9 @@ public class StorageFileApi : IStorageFileApi<FileObject>
         await this.uploadClient.UploadFileAsync(
             signedUrl.SignedUrl,
             localFilePath,
-            this.StorageHeader.Get(),
+            headers.Get(),
             progress
-        );
+        ).ConfigureAwait(false);
 
         return this.GetFinalPath(signedUrl.Key);
     }
@@ -441,17 +443,19 @@ public class StorageFileApi : IStorageFileApi<FileObject>
         if (inferContentType)
             options.ContentType = MimeMapping.MimeUtility.GetMimeMapping(signedUrl.Key);
 
-        this.StorageHeader.Add("Authorization", $"Bearer {signedUrl.Token}");
-        this.StorageHeader.Add("cache-control", $"max-age={options.CacheControl}");
-        this.StorageHeader.Add("content-type", options.ContentType);
+        var headers = new Header();
+        headers.Add(this.StorageHeader.Get());
+        headers.Add("Authorization", $"Bearer {signedUrl.Token}");
+        headers.Add("cache-control", $"max-age={options.CacheControl}");
+        headers.Add("content-type", options.ContentType);
 
         if (options.Upsert)
-            this.StorageHeader.Add("x-upsert", options.Upsert.ToString().ToLower());
+            headers.Add("x-upsert", options.Upsert.ToString().ToLower());
 
         if (options.Metadata != null)
-            this.StorageHeader.Add("x-metadata", ParseMetadata(options.Metadata));
+            headers.Add("x-metadata", ParseMetadata(options.Metadata));
 
-        options.Headers?.ToList().ForEach(x => this.StorageHeader.Add(x.Key, x.Value));
+        options.Headers?.ToList().ForEach(x => headers.Add(x.Key, x.Value));
 
         var progress = new Progress<float>();
 
@@ -461,9 +465,9 @@ public class StorageFileApi : IStorageFileApi<FileObject>
         await this.uploadClient.UploadBytesAsync(
             signedUrl.SignedUrl,
             data,
-            this.StorageHeader.Get(),
+            headers.Get(),
             progress
-        );
+        ).ConfigureAwait(false);
 
         return this.GetFinalPath(signedUrl.Key);
     }
@@ -832,26 +836,28 @@ public class StorageFileApi : IStorageFileApi<FileObject>
     {
         var uri = new Uri($"{this.Url}/object/{this.GetFinalPath(supabasePath)}");
 
-        this.StorageHeader.Add("cache-control", $"max-age={options.CacheControl}");
-        this.StorageHeader.Add("content-type", options.ContentType);
+        var headers = new Header();
+        headers.Add(this.StorageHeader.Get());
+        headers.Add("cache-control", $"max-age={options.CacheControl}");
+        headers.Add("content-type", options.ContentType);
 
         if (options.Upsert)
-            this.StorageHeader.Add("x-upsert", options.Upsert.ToString().ToLower());
+            headers.Add("x-upsert", options.Upsert.ToString().ToLower());
 
         if (options.Metadata != null)
-            this.StorageHeader.Add("x-metadata", ParseMetadata(options.Metadata));
+            headers.Add("x-metadata", ParseMetadata(options.Metadata));
 
-        options.Headers?.ToList().ForEach(x => this.StorageHeader.Add(x.Key, x.Value));
+        options.Headers?.ToList().ForEach(x => headers.Add(x.Key, x.Value));
 
         if (options.Duplex != null)
-            this.StorageHeader.Add("x-duplex", options.Duplex.ToLower());
+            headers.Add("x-duplex", options.Duplex.ToLower());
 
         var progress = new Progress<float>();
 
         if (onProgress != null)
             progress.ProgressChanged += onProgress;
 
-        await this.uploadClient.UploadFileAsync(uri, localPath, this.StorageHeader.Get(), progress, cancellationToken);
+        await this.uploadClient.UploadFileAsync(uri, localPath, headers.Get(), progress, cancellationToken).ConfigureAwait(false);
 
         return this.GetFinalPath(supabasePath);
     }
@@ -866,7 +872,9 @@ public class StorageFileApi : IStorageFileApi<FileObject>
     {
         var uri = new Uri($"{this.Url}/upload/resumable");
 
-        this.StorageHeader.Add("cache-control", $"max-age={options.CacheControl}");
+        var headers = new Header();
+        headers.Add(this.StorageHeader.Get());
+        headers.Add("cache-control", $"max-age={options.CacheControl}");
 
         var metadata = new MetadataCollection
         {
@@ -876,15 +884,15 @@ public class StorageFileApi : IStorageFileApi<FileObject>
         };
 
         if (options.Upsert)
-            this.StorageHeader.Add("x-upsert", options.Upsert.ToString().ToLower());
+            headers.Add("x-upsert", options.Upsert.ToString().ToLower());
 
         if (options.Metadata != null)
-            this.StorageHeader.Add("x-metadata", ParseMetadata(options.Metadata));
+            headers.Add("x-metadata", ParseMetadata(options.Metadata));
 
-        options.Headers?.ToList().ForEach(x => this.StorageHeader.Add(x.Key, x.Value));
+        options.Headers?.ToList().ForEach(x => headers.Add(x.Key, x.Value));
 
         if (options.Duplex != null)
-            this.StorageHeader.Add("x-duplex", options.Duplex.ToLower());
+            headers.Add("x-duplex", options.Duplex.ToLower());
 
         var progress = new Progress<float>();
 
@@ -895,10 +903,10 @@ public class StorageFileApi : IStorageFileApi<FileObject>
             uri,
             localPath,
             metadata,
-            this.StorageHeader.Get(),
+            headers.Get(),
             progress,
             cancellationToken
-        );
+        ).ConfigureAwait(false);
     }
 
     private async Task UploadOrContinue(
@@ -911,7 +919,9 @@ public class StorageFileApi : IStorageFileApi<FileObject>
     {
         var uri = new Uri($"{this.Url}/upload/resumable");
 
-        this.StorageHeader.Add("cache-control", $"max-age={options.CacheControl}");
+        var headers = new Header();
+        headers.Add(this.StorageHeader.Get());
+        headers.Add("cache-control", $"max-age={options.CacheControl}");
 
         var metadata = new MetadataCollection
         {
@@ -921,15 +931,15 @@ public class StorageFileApi : IStorageFileApi<FileObject>
         };
 
         if (options.Upsert)
-            this.StorageHeader.Add("x-upsert", options.Upsert.ToString().ToLower());
+            headers.Add("x-upsert", options.Upsert.ToString().ToLower());
 
         if (options.Metadata != null)
             metadata["metadata"] = JsonSerializer.Serialize(options.Metadata, Helpers.SerializerOptions);
 
-        options.Headers?.ToList().ForEach(x => this.StorageHeader.Add(x.Key, x.Value));
+        options.Headers?.ToList().ForEach(x => headers.Add(x.Key, x.Value));
 
         if (options.Duplex != null)
-            this.StorageHeader.Add("x-duplex", options.Duplex.ToLower());
+            headers.Add("x-duplex", options.Duplex.ToLower());
 
         var progress = new Progress<float>();
 
@@ -940,10 +950,10 @@ public class StorageFileApi : IStorageFileApi<FileObject>
             uri,
             data,
             metadata,
-            this.StorageHeader.Get(),
+            headers.Get(),
             progress,
             cancellationToken
-        );
+        ).ConfigureAwait(false);
     }
 
     private static string ParseMetadata(Dictionary<string, string> metadata)
@@ -964,26 +974,28 @@ public class StorageFileApi : IStorageFileApi<FileObject>
     {
         var uri = new Uri($"{this.Url}/object/{this.GetFinalPath(supabasePath)}");
 
-        this.StorageHeader.Add("cache-control", $"max-age={options.CacheControl}");
-        this.StorageHeader.Add("content-type", options.ContentType);
+        var headers = new Header();
+        headers.Add(this.StorageHeader.Get());
+        headers.Add("cache-control", $"max-age={options.CacheControl}");
+        headers.Add("content-type", options.ContentType);
 
         if (options.Upsert)
-            this.StorageHeader.Add("x-upsert", options.Upsert.ToString().ToLower());
+            headers.Add("x-upsert", options.Upsert.ToString().ToLower());
 
         if (options.Metadata != null)
-            this.StorageHeader.Add("x-metadata", ParseMetadata(options.Metadata));
+            headers.Add("x-metadata", ParseMetadata(options.Metadata));
 
-        options.Headers?.ToList().ForEach(x => this.StorageHeader.Add(x.Key, x.Value));
+        options.Headers?.ToList().ForEach(x => headers.Add(x.Key, x.Value));
 
         if (options.Duplex != null)
-            this.StorageHeader.Add("x-duplex", options.Duplex.ToLower());
+            headers.Add("x-duplex", options.Duplex.ToLower());
 
         var progress = new Progress<float>();
 
         if (onProgress != null)
             progress.ProgressChanged += onProgress;
 
-        await this.uploadClient.UploadBytesAsync(uri, data, this.StorageHeader.Get(), progress, cancellationToken);
+        await this.uploadClient.UploadBytesAsync(uri, data, headers.Get(), progress, cancellationToken).ConfigureAwait(false);
 
         return this.GetFinalPath(supabasePath);
     }

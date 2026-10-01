@@ -265,6 +265,26 @@ public class StorageFileApiContractTests
     }
 
     [TestMethod]
+    public async Task Upload_ShouldNotSendHeadersFromAnEarlierUpload()
+    {
+        var signedUrl = new UploadSignedUrl(
+            new Uri($"{this.server.Url}/storage/v1/object/upload/sign/{Bucket}/a.bin?token=abc"),
+            "abc",
+            "a.bin");
+        this.Respond($"/storage/v1/object/upload/sign/{Bucket}/a.bin", "POST", 200, "{\"Key\":\"x\"}");
+        this.Respond($"/storage/v1/object/{Bucket}/b.bin", "POST", 200, "{\"Key\":\"x\"}");
+        var bucket = this.client.From(Bucket);
+        await bucket.UploadToSignedUrl(new byte[] { 0x1 }, signedUrl, new FileOptions { Upsert = true });
+        await bucket.Upload(new byte[] { 0x1 }, "b.bin");
+        var request = this.server.LogEntries.Last().RequestMessage!;
+        using (new AssertionScope())
+        {
+            this.HeaderOf(request, "Authorization").Should().Be("Bearer test-key", "a signed upload's token must not replace the client's key on later uploads");
+            request.Headers.Should().NotContainKey("x-upsert", "an upsert on one upload must not make later uploads on the same bucket overwrite");
+        }
+    }
+
+    [TestMethod]
     public async Task Upload_ShouldReportProgress_GivenAProgressHandler()
     {
         this.Respond($"/storage/v1/object/{Bucket}/a.bin", "POST", 200, "{\"Key\":\"x\"}");
