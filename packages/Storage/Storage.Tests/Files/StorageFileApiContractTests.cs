@@ -2,6 +2,7 @@ using System;
 using System.IO;
 using System.Linq;
 using System.Collections.Generic;
+using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
 using FluentAssertions;
@@ -276,6 +277,23 @@ public class StorageFileApiContractTests
         (await Task.WhenAny(reported.Task, Task.Delay(2000))).Should().Be(reported.Task,
             "the upload must surface progress to the caller's handler");
         onProgress.Received().Invoke(Arg.Any<object>(), Arg.Any<float>());
+    }
+
+    [TestMethod]
+    public async Task Upload_ShouldNotPutHeadersOnTheSharedHttpClient()
+    {
+        using var injectedClient = new HttpClient();
+        injectedClient.DefaultRequestHeaders.Add("X-Injected", "true");
+        var storage = new Client($"{this.server.Url}/storage/v1", new ClientOptions { HttpUploadClient = injectedClient },
+            new Dictionary<string, string> { { "Authorization", "Bearer test-key" } });
+        this.Respond($"/storage/v1/object/{Bucket}/a.bin", "POST", 200, "{\"Key\":\"x\"}");
+        await storage.From(Bucket).Upload(new byte[] { 0x1 }, "a.bin");
+        using (new AssertionScope())
+        {
+            injectedClient.DefaultRequestHeaders.Select(header => header.Key).Should().Equal(new[] { "X-Injected" },
+                "an upload must not leave its headers on a client other uploads share (issue #469)");
+            this.SingleRequest().Headers.Should().ContainKey("X-Injected", "the caller's own default headers must still be sent (issue #469)");
+        }
     }
 
     [TestMethod]

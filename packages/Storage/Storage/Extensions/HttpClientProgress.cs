@@ -195,17 +195,16 @@ internal static class HttpClientProgress
     )
     {
         var content = new ProgressableStreamContent(stream, 4096, progress);
+        var request = new HttpRequestMessage(HttpMethod.Post, uri) { Content = content };
 
         if (headers != null)
         {
-            client.DefaultRequestHeaders.Clear();
-
             foreach (var header in headers)
             {
                 if (header.Key.Contains("content"))
                     content.Headers.Add(header.Key, header.Value);
                 else
-                    client.DefaultRequestHeaders.Add(header.Key, header.Value);
+                    request.Headers.Add(header.Key, header.Value);
             }
         }
 
@@ -217,7 +216,7 @@ internal static class HttpClientProgress
 
         try
         {
-            var response = await client.PostAsync(uri, content, cancellationToken);
+            var response = await client.SendAsync(request, cancellationToken).ConfigureAwait(false);
             statusCode = (int) response.StatusCode;
             activity.SetHttpResponseTags(statusCode.Value);
 
@@ -315,12 +314,14 @@ internal static class HttpClientProgress
             fileStream.Seek(0, SeekOrigin.Begin);
         }
 
+        // Copied and validated up front, not in AddHeaders: BirdMessenger swallows exceptions from that
+        // callback, and the caller's dictionary can change during a long upload.
+        var uploadHeaders = new HttpRequestMessage().Headers;
         if (headers != null)
         {
-            client.DefaultRequestHeaders.Clear();
             foreach (var header in headers)
             {
-                client.DefaultRequestHeaders.Add(header.Key, header.Value);
+                uploadHeaders.Add(header.Key, header.Value);
             }
         }
 
@@ -347,6 +348,7 @@ internal static class HttpClientProgress
                     Endpoint = uri,
                     Metadata = metadata,
                     UploadLength = fileStream.Length,
+                    OnPreSendRequestAsync = AddHeaders,
                 };
 
                 try
@@ -384,6 +386,7 @@ internal static class HttpClientProgress
                     return Task.CompletedTask;
                 },
                 OnFailedAsync = _ => Task.CompletedTask,
+                OnPreSendRequestAsync = AddHeaders,
             };
 
             var responsePatch = await client.TusPatchAsync(patchOption, cancellationToken);
@@ -405,6 +408,14 @@ internal static class HttpClientProgress
         finally
         {
             StorageInstrumentation.RecordTransfer(StorageInstrumentation.DirectionUpload, HttpMethod.Post, uri, bytes, statusCode, errorType, startTimestamp);
+        }
+
+        Task AddHeaders(PreSendRequestEvent preSend)
+        {
+            foreach (var header in uploadHeaders)
+                preSend.HttpRequestMsg.Headers.Add(header.Key, header.Value);
+
+            return Task.CompletedTask;
         }
     }
 

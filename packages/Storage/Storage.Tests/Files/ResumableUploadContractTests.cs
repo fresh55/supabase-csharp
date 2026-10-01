@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Linq;
+using System.Net.Http;
 using System.Threading.Tasks;
 using FluentAssertions;
 using FluentAssertions.Execution;
@@ -88,6 +89,24 @@ namespace Storage.Tests.Files
             FluentActions.Invoking(() => File.Open(path, FileMode.Open, FileAccess.Read, FileShare.None).Dispose())
                 .Should().NotThrow("the caller must be able to move or delete the file after the upload");
             File.Delete(path);
+        }
+
+        [TestMethod]
+        public async Task UploadOrResume_ShouldNotPutHeadersOnTheSharedHttpClient()
+        {
+            using var injectedClient = new HttpClient();
+            injectedClient.DefaultRequestHeaders.Add("X-Injected", "true");
+            var storage = new Client($"{this.server.Url}/storage/v1", new ClientOptions { HttpUploadClient = injectedClient },
+                new Dictionary<string, string> { { "Authorization", "Bearer test-key" } });
+            await storage.From(Bucket).UploadOrResume(Payload, FileName, new FileOptions());
+            using (new AssertionScope())
+            {
+                injectedClient.DefaultRequestHeaders.Select(header => header.Key).Should().Equal(new[] { "X-Injected" },
+                    "an upload must not leave its headers on a client other uploads share (issue #469)");
+                this.server.LogEntries.Select(entry => entry.RequestMessage!.Headers!.Keys).Should().OnlyContain(
+                    keys => keys.Contains("Authorization") && keys.Contains("X-Injected"),
+                    "every TUS request must carry both the upload's headers and the caller's own (issue #469)");
+            }
         }
 
         private void StubTusEndpoints()
