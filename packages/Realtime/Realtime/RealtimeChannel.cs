@@ -512,9 +512,6 @@ public class RealtimeChannel : IRealtimeChannel
         // Throw an exception if there is a problem receiving a join response
         joinPushTimeoutCallback = (_, _) =>
         {
-            this.RemoveStateChangedHandler(channelCallback);
-            this.JoinPush.OnTimeout -= joinPushTimeoutCallback;
-
             this.NotifyErrorOccurred(new RealtimeException("Push Timeout")
             {
                 Reason = FailureHint.Reason.PushTimeout
