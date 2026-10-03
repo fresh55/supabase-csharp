@@ -1173,7 +1173,7 @@ public class Client : IGotrueClient<User, Session>
     /// </summary>
     private async Task<Jwk?> FindSigningKeyAsync(string? alg, string? kid, Jwks? suppliedKeys, CancellationToken cancellationToken)
     {
-        if (string.IsNullOrEmpty(kid) || alg is not ("RS256" or "ES256"))
+        if (string.IsNullOrEmpty(kid) || !JwtVerification.CanVerify(alg))
         {
             return null;
         }
