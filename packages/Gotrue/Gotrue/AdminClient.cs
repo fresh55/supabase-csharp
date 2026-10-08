@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Text.Json;
 using System.Threading.Tasks;
 using Supabase.Gotrue.Interfaces;
 using Supabase.Gotrue.Mfa;
@@ -104,8 +103,7 @@ public class AdminClient : IGotrueAdminClient<User>
         if (response.Content is null)
             return null;
 
-        var result = JsonSerializer.Deserialize<GenerateLinkResponse>(response.Content, Helpers.SerializerOptions);
-        return result;
+        return Helpers.DeserializeBody<GenerateLinkResponse>(response);
     }
 
     /// <inheritdoc />
@@ -117,7 +115,7 @@ public class AdminClient : IGotrueAdminClient<User>
         if (response.Content is null)
             return null;
 
-        var result = JsonSerializer.Deserialize<List<Factor>>(response.Content, Helpers.SerializerOptions);
+        var result = Helpers.DeserializeBody<List<Factor>>(response);
         var listFactorsResponse = new MfaAdminListFactorsResponse
         {
             Factors = result
