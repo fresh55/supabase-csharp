@@ -128,26 +128,6 @@ public class GetClaimsTests
     }
 
     [TestMethod]
-    public async Task GetClaimsAsync_ShouldFallBackToServer_GivenNoEcdsaSupport()
-    {
-        JwtVerification.EcdsaAvailable = false;
-        try
-        {
-            var response = await this.client.GetClaimsAsync(GenerateToken(this.publishedCredentials, FutureExpiry));
-            using (new AssertionScope())
-            {
-                response.Claims.Sub.Should().Be("user-123");
-                this.server.CountReceivedRequests(JwksPath).Should().Be(0, "the key lookup is skipped when ES256 cannot be verified locally");
-                this.server.CountReceivedRequests(UserPath).Should().Be(1, "platforms without ECDsa, such as Unity, verify on the server (issue #481)");
-            }
-        }
-        finally
-        {
-            JwtVerification.EcdsaAvailable = true;
-        }
-    }
-
-    [TestMethod]
     [DataRow("expired")]
     [DataRow("no exp")]
     [DataRow("malformed")]

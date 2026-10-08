@@ -16,7 +16,7 @@ internal static class JwtVerification
     private static readonly JwtSecurityTokenHandler Handler = new JwtSecurityTokenHandler();
 
     // Some platforms, like Unity, have no ECDsa. ES256 tokens are verified on the server there.
-    internal static bool EcdsaAvailable { get; set; } = IsEcdsaAvailable();
+    private static readonly bool EcdsaAvailable = IsEcdsaAvailable();
 
     internal static JwtSecurityToken Decode(string token)
     {
@@ -42,7 +42,9 @@ internal static class JwtVerification
         }
     }
 
-    internal static bool CanVerify(string? alg) => alg == "RS256" || (alg == "ES256" && EcdsaAvailable);
+    internal static bool CanVerify(string? alg) => CanVerify(alg, EcdsaAvailable);
+
+    internal static bool CanVerify(string? alg, bool ecdsaAvailable) => alg == "RS256" || (alg == "ES256" && ecdsaAvailable);
 
     internal static void VerifySignature(string token, Jwk jwk)
     {
