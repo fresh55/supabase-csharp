@@ -98,7 +98,7 @@ public class Push : IRealtimePush<RealtimeChannel, SocketResponse>
     /// <param name="timeoutMs"></param>
     public void Resend(int timeoutMs = Constants.DefaultTimeout)
     {
-        this._timeoutMs = timeoutMs;
+        this._timer.Interval = timeoutMs;
         Ref = null;
         _msgRefEvent = null;
 
