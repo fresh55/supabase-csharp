@@ -62,9 +62,6 @@ await bucket.Move("me.png", "old/me.png");
 await bucket.Copy("old/me.png", "backup/me.png");
 await bucket.Remove("old/me.png");
 
-// List objects under a prefix, one page at a time.
-var page = await bucket.ListV2Async(new SearchV2Options { Prefix = "folder/" });
-
 // Download to a local path (returns the path) or into memory (returns bytes).
 await bucket.Download("me.png", "./downloaded.png");
 byte[] data = await bucket.Download("me.png");
