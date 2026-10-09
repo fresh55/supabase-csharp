@@ -340,7 +340,11 @@ internal static class HttpClientProgress
             var cacheKey =
                 $"{metadata["bucketName"]}/{metadata["objectName"]}/{metadata["contentType"]}";
 
-            UploadMemoryCache.TryGet(cacheKey, out var upload);
+            // An empty upload is complete once created, so it never resumes and BirdMessenger sends no PATCH.
+            var empty = fileStream.Length == 0;
+            string? upload = null;
+            if (!empty)
+                UploadMemoryCache.TryGet(cacheKey, out upload);
             Uri? fileLocation = null;
             if (upload == null)
             {
@@ -358,6 +362,13 @@ internal static class HttpClientProgress
                         createOption,
                         cancellationToken
                     );
+
+                    if (empty)
+                    {
+                        statusCode = (int) responseCreate.OriginResponseMessage.StatusCode;
+                        activity.SetHttpResponseTags(statusCode.Value);
+                        return responseCreate.OriginResponseMessage;
+                    }
 
                     fileLocation = responseCreate.FileLocation;
                     UploadMemoryCache.Set(cacheKey, fileLocation.ToString());
