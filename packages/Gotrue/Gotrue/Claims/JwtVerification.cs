@@ -1,5 +1,6 @@
 using System;
 using System.IdentityModel.Tokens.Jwt;
+using System.Security.Cryptography;
 using System.Text.Json;
 using Microsoft.IdentityModel.Tokens;
 using Supabase.Gotrue.Exceptions;
@@ -13,6 +14,9 @@ namespace Supabase.Gotrue.Claims;
 internal static class JwtVerification
 {
     private static readonly JwtSecurityTokenHandler Handler = new JwtSecurityTokenHandler();
+
+    // Some platforms, like Unity, have no ECDsa. ES256 tokens are verified on the server there.
+    private static readonly bool EcdsaAvailable = IsEcdsaAvailable();
 
     internal static JwtSecurityToken Decode(string token)
     {
@@ -37,6 +41,10 @@ internal static class JwtVerification
             throw new GotrueException("The token has expired.", InvalidJwt);
         }
     }
+
+    internal static bool CanVerify(string? alg) => CanVerify(alg, EcdsaAvailable);
+
+    internal static bool CanVerify(string? alg, bool ecdsaAvailable) => alg == "RS256" || (alg == "ES256" && ecdsaAvailable);
 
     internal static void VerifySignature(string token, Jwk jwk)
     {
@@ -87,6 +95,20 @@ internal static class JwtVerification
         catch (JsonException ex)
         {
             throw new GotrueException("The token's claims could not be read.", InvalidJwt, ex);
+        }
+    }
+
+    private static bool IsEcdsaAvailable()
+    {
+        try
+        {
+            ECDsa.Create().Dispose();
+            return true;
+        }
+        // Any failure means no ECDsa. It must not escape the static initializer.
+        catch (Exception)
+        {
+            return false;
         }
     }
 }
