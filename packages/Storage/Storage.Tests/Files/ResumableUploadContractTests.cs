@@ -71,6 +71,18 @@ namespace Storage.Tests.Files
         }
 
         [TestMethod]
+        public async Task UploadOrResume_ShouldCreateWithoutPatching_GivenAnEmptyPayload()
+        {
+            UploadMemoryCache.Set(CacheKey, $"{this.server.Url}{ResumablePath}/cached-session");
+            await this.client.From(Bucket).UploadOrResume(Array.Empty<byte>(), FileName, new FileOptions());
+            using (new AssertionScope())
+            {
+                this.Paths("POST").Should().Contain(ResumablePath, "an empty upload is complete once created, even when an older session is cached (issue #496)");
+                this.Paths("PATCH").Should().BeEmpty();
+            }
+        }
+
+        [TestMethod]
         public async Task UploadOrResume_ShouldResumeCachedSessionWithoutCreating()
         {
             var cachedSession = $"{ResumablePath}/cached-session";
