@@ -1,1 +1,3 @@
 #nullable enable
+Supabase.Postgrest.Interfaces.IPostgrestTable<TModel>.StripNulls() -> Supabase.Postgrest.Interfaces.IPostgrestTable<TModel!>!
+Supabase.Postgrest.Table<TModel>.StripNulls() -> Supabase.Postgrest.Interfaces.IPostgrestTable<TModel!>!
