@@ -38,6 +38,7 @@ public partial class Client : IFunctionsClient
     private readonly HttpClient httpClient;
     private readonly string baseUrl;
     private readonly FunctionRegion region;
+    private string? token;
 
     /// <summary>
     /// Function that can be set to return dynamic headers.
@@ -62,6 +63,9 @@ public partial class Client : IFunctionsClient
         this.Options = options ?? new ClientOptions();
         this.httpClient = this.Options.HttpClient ?? DefaultHttpClientFactory.Create(proxy: this.Options.Proxy);
     }
+
+    /// <inheritdoc />
+    public void SetAuth(string token) => this.token = token;
 
     /// <summary>
     /// Returns an <see cref="HttpContent"/> response, allowing for coersion into Streams, Strings, and byte[]
@@ -172,6 +176,7 @@ public partial class Client : IFunctionsClient
             options.Headers = this.GetHeaders().MergeLeft(options.Headers);
         }
 
+        token ??= this.token;
         if (!string.IsNullOrEmpty(token))
         {
             options.Headers["Authorization"] = $"Bearer {token}";
