@@ -18,7 +18,8 @@ namespace Supabase.Postgrest.Exceptions
 			ServerError,
 			UndefinedTable,
 			UndefinedFunction,
-			InvalidArgument
+			InvalidArgument,
+			UriTooLong
 		}
 
 		public static Reason DetectReason(PostgrestException pgex)
@@ -34,6 +35,7 @@ namespace Supabase.Postgrest.Exceptions
 				404 when pgex.Content.Contains("42P01") => UndefinedFunction,
 				409 when pgex.Content.Contains("23503") => ForeignKeyViolation,
 				409 when pgex.Content.Contains("23505") => UniquenessViolation,
+				414 => UriTooLong,
 				500 => ServerError,
 				_ => Unknown
 			};

@@ -12,7 +12,8 @@ using WireMock.Server;
 namespace Postgrest.Tests.Requests;
 
 /// <summary>
-///     A 2xx body that isn't JSON throws a <see cref="PostgrestException" /> carrying the body and status.
+///     A body that isn't JSON throws a <see cref="PostgrestException" /> carrying the body and status,
+///     and a 414 is reported as <see cref="FailureHint.Reason.UriTooLong" />.
 /// </summary>
 [TestClass]
 [TestCategory("Contract")]
@@ -58,6 +59,15 @@ public class NonJsonResponseTests
         await act.Should().ThrowAsync<PostgrestException>()
             .Where(exception => exception.Content == ProxyErrorPage && exception.StatusCode == 200,
                 "postgrest-js handles rpc responses the same way (#260)");
+    }
+
+    [TestMethod]
+    public async Task Get_ShouldReportUriTooLong_Given414()
+    {
+        this.server.Given(Request.Create().WithPath("/todos")).RespondWith(Response.Create().WithStatusCode(414).WithBody("URI too long"));
+        var act = () => this.client.Table<Todo>().Get();
+        await act.Should().ThrowAsync<PostgrestException>()
+            .Where(exception => exception.Reason == FailureHint.Reason.UriTooLong, "the gateway answers an overlong URL with a 414 (#235)");
     }
 
     private void MockProxyErrorPage(string path) =>
