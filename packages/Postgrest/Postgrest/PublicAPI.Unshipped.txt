@@ -1,3 +1,4 @@
 #nullable enable
 Supabase.Postgrest.ClientOptions.Timeout.get -> System.TimeSpan?
 Supabase.Postgrest.ClientOptions.Timeout.set -> void
+Supabase.Postgrest.Exceptions.FailureHint.Reason.UriTooLong = 8 -> Supabase.Postgrest.Exceptions.FailureHint.Reason
