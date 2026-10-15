@@ -30,18 +30,6 @@
   </PropertyGroup>
 
   <!--
-    Target frameworks are uniform across the monorepo: shipped packages ship as
-    netstandard2.1, and test projects run on net10.0. Keyed off the project-name suffix
-    so a new package or test project inherits the right target with no per-project setting.
-  -->
-  <PropertyGroup Condition="!$(MSBuildProjectName.EndsWith('.Tests'))">
-    <TargetFramework>netstandard2.1</TargetFramework>
-  </PropertyGroup>
-  <PropertyGroup Condition="$(MSBuildProjectName.EndsWith('.Tests'))">
-    <TargetFramework>net10.0</TargetFramework>
-  </PropertyGroup>
-
-  <!--
     Test projects keep the documentation file on (so IDE0005 unused-using analysis still runs
     on build) but suppress CS1591: public test fixtures and their members are not API surface
     and are not expected to carry XML doc comments.

@@ -1,5 +1,6 @@
 <Project Sdk="Microsoft.NET.Sdk">
 	<PropertyGroup>
+		<TargetFramework>netstandard2.1</TargetFramework>
 		<PackOnBuild>true</PackOnBuild>
 		<PackageId>Supabase.Core</PackageId>
 		<PackageProjectUrl>https://github.com/supabase/supabase-csharp/tree/master/packages/Core</PackageProjectUrl>
