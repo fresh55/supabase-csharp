@@ -177,18 +177,29 @@ public class SessionRestoreContractTests
     }
 
     [TestMethod]
-    public async Task StopAutoRefresh_ShouldHoldTheTimerUntilStart_GivenAnExpiredSession()
+    public async Task StopAutoRefresh_ShouldHoldTheTimerUntilStart_GivenAnArmedTimer()
     {
         var handler = new UnreachableHandler();
-        var client = TestClients.Against(this.server, autoRefreshToken: true, new HttpClient(handler));
+        this.persistence.SaveSession(SessionDueInASecond());
+        var client = this.Restore(TestClients.Against(this.server, autoRefreshToken: true, new HttpClient(handler)));
+        client.StartAutoRefresh();
         client.StopAutoRefresh();
-        this.persistence.SaveSession(new Session { AccessToken = "an-access-token", RefreshToken = "a-refresh-token", ExpiresIn = 60, CreatedAt = DateTime.UtcNow.AddHours(-1) });
-        this.Restore(client);
-        await Task.Delay(250);
-        handler.Attempts.Should().Be(0, "a stopped client must not refresh, even when the session is due");
+        await Task.Delay(1500);
+        handler.Attempts.Should().Be(0, "a stopped client must not refresh, even after a second Start");
         client.StartAutoRefresh();
         await handler.Started;
-        handler.Attempts.Should().Be(1, "Start resumes the refresh, and a session that expired while stopped is due at once");
+        handler.Attempts.Should().Be(1, "Start resumes the refresh");
+    }
+
+    [TestMethod]
+    public async Task Shutdown_ShouldCancelTheRefresh_GivenAnArmedTimer()
+    {
+        var handler = new UnreachableHandler();
+        this.persistence.SaveSession(SessionDueInASecond());
+        var client = this.Restore(TestClients.Against(this.server, autoRefreshToken: true, new HttpClient(handler)));
+        client.Shutdown();
+        await Task.Delay(1500);
+        handler.Attempts.Should().Be(0, "a shut down client must not refresh");
     }
 
     [TestMethod]
@@ -386,6 +397,10 @@ public class SessionRestoreContractTests
         act.Should().NotThrow();
         client.CurrentSession.Should().BeNull();
     }
+
+    /// <summary>A 60 s session refreshes at 48 s, so this one is due in a second.</summary>
+    private static Session SessionDueInASecond() =>
+        new() { AccessToken = "an-access-token", RefreshToken = "a-refresh-token", ExpiresIn = 60, CreatedAt = DateTime.UtcNow.AddSeconds(-47) };
 
     private IGotrueClient<User, Session> Restore(IGotrueClient<User, Session> client)
     {
