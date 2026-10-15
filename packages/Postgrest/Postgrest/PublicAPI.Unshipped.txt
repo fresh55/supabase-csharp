@@ -1,3 +1,4 @@
 #nullable enable
+Supabase.Postgrest.Exceptions.FailureHint.Reason.UriTooLong = 8 -> Supabase.Postgrest.Exceptions.FailureHint.Reason
 Supabase.Postgrest.Interfaces.IPostgrestTable<TModel>.StripNulls() -> Supabase.Postgrest.Interfaces.IPostgrestTable<TModel!>!
 Supabase.Postgrest.Table<TModel>.StripNulls() -> Supabase.Postgrest.Interfaces.IPostgrestTable<TModel!>!
