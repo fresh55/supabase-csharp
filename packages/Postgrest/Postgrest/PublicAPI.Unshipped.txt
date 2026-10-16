@@ -1,1 +1,2 @@
 #nullable enable
+Supabase.Postgrest.Exceptions.FailureHint.Reason.UriTooLong = 8 -> Supabase.Postgrest.Exceptions.FailureHint.Reason

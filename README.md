@@ -132,12 +132,7 @@ dotnet test  Supabase.sln --configuration Release
 ```
 
 Some test suites are end-to-end and need a local Supabase stack via the
-[Supabase CLI](https://supabase.com/docs/guides/cli) (`supabase start`, which requires Docker). The
-Realtime suite additionally expects `realtime-dev.localhost` to resolve locally — add a hosts entry:
-
-```
-127.0.0.1  realtime-dev.localhost
-```
+[Supabase CLI](https://supabase.com/docs/guides/cli) (`supabase start`, which requires Docker).
 
 ## Versioning & releases
 

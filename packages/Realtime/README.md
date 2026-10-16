@@ -18,7 +18,7 @@ this package directly to use Realtime on its own.
 dotnet add package Supabase.Realtime
 ```
 
-Targets .NET Standard 2.0 and 2.1.
+Targets .NET Standard 2.1.
 
 ## Getting started
 
@@ -29,18 +29,19 @@ until disconnected.
 
 ```csharp
 using Supabase.Realtime;
+using Supabase.Realtime.PostgresChanges;
+using static Supabase.Realtime.PostgresChanges.PostgresChangesOptions;
 
 var client = new Client("ws://realtime-dev.localhost:4000/socket");
 await client.ConnectAsync();
 
-// Shorthand for a postgres_changes subscription: database, schema, table
-var channel = client.Channel("realtime", "public", "todos");
+var channel = client.Channel("todos");
 
-channel.AddPostgresChangeHandler(ListenType.Updates, (_, change) =>
+channel.OnPostgresChange((_, change) =>
 {
     var updated = change.Model<Todo>();
     var previous = change.OldModel<Todo>();
-});
+}, ListenType.Updates, new PostgresChangesFilter { Table = "todos" });
 
 await channel.Subscribe();
 ```
@@ -60,17 +61,16 @@ must belong to the `supabase_realtime` publication.
 
 ```csharp
 var channel = client.Channel("public-users");
-channel.Register(new PostgresChangesOptions("public", "users"));
 
-channel.AddPostgresChangeHandler(ListenType.All, (_, change) =>
+channel.OnPostgresChange((_, change) =>
 {
-    switch (change.Event)
+    switch (change.Payload?.Data?.Type)
     {
         case EventType.Insert: /* row created */ break;
         case EventType.Update: /* row updated */ break;
         case EventType.Delete: /* row deleted */ break;
     }
-});
+}, ListenType.All, new PostgresChangesFilter { Table = "users" });
 
 await channel.Subscribe();
 ```
@@ -88,9 +88,9 @@ class MouseBroadcast : BaseBroadcast<MouseStatus> { }
 
 class MouseStatus
 {
-    [JsonProperty("mouseX")] public float MouseX { get; set; }
-    [JsonProperty("mouseY")] public float MouseY { get; set; }
-    [JsonProperty("userId")] public string UserId { get; set; }
+    [JsonPropertyName("mouseX")] public float MouseX { get; set; }
+    [JsonPropertyName("mouseY")] public float MouseY { get; set; }
+    [JsonPropertyName("userId")] public string UserId { get; set; }
 }
 ```
 
@@ -130,7 +130,7 @@ Given a typed presence model:
 ```csharp
 class UserPresence : BasePresence
 {
-    [JsonProperty("lastSeen")] public DateTime LastSeen { get; set; }
+    [JsonPropertyName("lastSeen")] public DateTime LastSeen { get; set; }
 }
 ```
 
@@ -141,7 +141,7 @@ var presenceId = Guid.NewGuid().ToString();
 var channel = client.Channel("last-seen");
 var presence = channel.Register<UserPresence>(presenceId);
 
-presence.AddPresenceEventHandler(EventType.Sync, (_, _) =>
+presence.AddPresenceEventHandler(IRealtimePresence.EventType.Sync, (_, _) =>
 {
     foreach (var state in presence.CurrentState)
     {
@@ -165,7 +165,7 @@ presence.Track(new UserPresence { LastSeen = DateTime.Now });
 Event handlers are delegates, scoped to the object they concern — socket handlers receive
 connectivity events, channel handlers receive join/leave events, and so on. Register and remove them
 with the `Add`/`Remove`/`Clear` methods (e.g. `RealtimeSocket.AddStateChangedHandler`,
-`RealtimeChannel.AddPostgresChangeHandler`, `RealtimeBroadcast.AddBroadcastEventHandler`).
+`RealtimeBroadcast.AddBroadcastEventHandler`).
 
 For logging, attach a debug handler rather than relying on console output:
 
@@ -180,9 +180,6 @@ client.AddDebugHandler((sender, message, exception) => Debug.WriteLine(message))
 
 Contributions are welcome. See the [repository root](https://github.com/supabase/supabase-csharp)
 for how to build and test the SDK.
-
-Note that the Realtime test suite expects `realtime-dev.localhost` to resolve locally — add a hosts
-entry for `127.0.0.1  realtime-dev.localhost`.
 
 ## License
 
