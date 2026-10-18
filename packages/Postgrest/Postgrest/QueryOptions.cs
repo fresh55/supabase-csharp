@@ -61,6 +61,8 @@ namespace Supabase.Postgrest
 		/// </summary>
 		public string? OnConflict { get; set; }
 
+		internal QueryOptions Clone() => (QueryOptions) this.MemberwiseClone();
+
 		public Dictionary<string, string> ToHeaders()
 		{
 			var headers = new Dictionary<string, string>();
