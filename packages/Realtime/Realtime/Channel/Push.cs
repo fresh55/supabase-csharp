@@ -121,7 +121,7 @@ public class Push : IRealtimePush<RealtimeChannel, SocketResponse>
             Event = EventName,
             Payload = Payload,
             Ref = Ref,
-            JoinRef = EventName == Constants.ChannelEventJoin ? Ref : null,
+            JoinRef = Channel.JoinPush?.Ref,
         };
             
         _socket.Push(Message);
