@@ -27,17 +27,12 @@ public class ClientChannelCacheTests
     [TestMethod]
     public void Channel_ShouldReturnAFreshChannel_GivenUnsubscribe()
     {
-        var first = this.client.Channel("room");
-        first.Unsubscribe();
-        this.client.Channel("room").Should().NotBeSameAs(first);
-    }
-
-    [TestMethod]
-    public void Channel_ShouldReturnAFreshChannel_GivenUnsubscribeOnATableChannel()
-    {
-        var first = this.client.Channel("realtime", "public", "todos");
-        first.Unsubscribe();
-        this.client.Channel("realtime", "public", "todos").Should().NotBeSameAs(first);
+        var named = this.client.Channel("room");
+        var table = this.client.Channel("realtime", "public", "todos");
+        named.Unsubscribe();
+        table.Unsubscribe();
+        this.client.Channel("room").Should().NotBeSameAs(named);
+        this.client.Channel("realtime", "public", "todos").Should().NotBeSameAs(table);
     }
 
     [TestMethod]
@@ -64,7 +59,6 @@ public class ClientChannelCacheTests
     {
         var channel = this.client.Channel("room");
         channel.Unsubscribe();
-        // No server answers the join; only the moment it starts joining matters here.
         _ = channel.Subscribe(100);
         await Task.Yield();
         this.client.Channel("room").Should().BeSameAs(channel);
