@@ -89,17 +89,6 @@ public class ChannelMessagingTests
     }
 
     [TestMethod]
-    public async Task SetAuth_ShouldJoinWithoutAToken_GivenNullAfterAToken()
-    {
-        var channel = this.socketClient.Channel("signed-out");
-        this.socketClient.SetAuth("user-token");
-        this.socketClient.SetAuth(null);
-        await channel.Subscribe();
-        var payload = JsonSerializer.Serialize(channel.JoinPush!.Payload, channel.JoinPush.Payload!.GetType(), Wire.Settings());
-        Assert.IsFalse(payload.Contains("access_token"));
-    }
-
-    [TestMethod]
     public async Task Subscribe_ShouldSendJoinParameters()
     {
         var parameters = new Dictionary<string, string> { { "key", "value" } };

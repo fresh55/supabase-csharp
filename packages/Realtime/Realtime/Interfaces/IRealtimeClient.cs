@@ -140,6 +140,6 @@ public interface IRealtimeClient<TSocket, TChannel> : IGettableHeaders
     /// <summary>
     /// Sets the authentication JWT to be passed into all realtime channels. Used for WALRUS permissions.
     /// </summary>
-    /// <param name="jwt">The user's JWT, or null to clear it, for example after sign-out.</param>
-    void SetAuth(string? jwt);
+    /// <param name="jwt"></param>
+    void SetAuth(string jwt);
 }
