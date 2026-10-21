@@ -24,7 +24,7 @@ internal sealed class FakeWebSocketFactory(IWebsocketClient client) : IWebSocket
     }
 }
 
-/// <summary>Implements only the <see cref="IWebsocketClient"/> members <see cref="RealtimeSocket"/> actually touches; the rest are unreachable from this test and throw if hit.</summary>
+/// <summary>Implements only the <see cref="IWebsocketClient"/> members <see cref="RealtimeSocket"/> actually touches; the rest are unreachable from these tests and throw if hit.</summary>
 internal sealed class FakeWebsocketClient : IWebsocketClient
 {
     public int StartOrFailCallCount { get; private set; }
@@ -41,7 +41,7 @@ internal sealed class FakeWebsocketClient : IWebsocketClient
     public TimeSpan? ReconnectTimeout { get; set; }
     public TimeSpan? ErrorReconnectTimeout { get; set; }
 
-    /// <summary>When set, starting the client reports it as connected, the way the real transport does.</summary>
+    /// <summary>When set, <c>StartOrFail</c> reports the client as connected.</summary>
     public bool OpenOnStart { get; init; }
 
     public Task StartOrFail()
@@ -66,7 +66,7 @@ internal sealed class FakeWebsocketClient : IWebsocketClient
 
     public void Dispose() { }
 
-    // Unused by RealtimeSocket — not exercised by these tests.
+    // Unused by RealtimeSocket, not exercised by these tests.
     public Uri Url { get; set; } = new("ws://localhost/unused");
     public TimeSpan ConnectTimeout { get; set; }
     public TimeSpan? LostReconnectTimeout { get; set; }
