@@ -302,10 +302,12 @@ public class Client : IRealtimeClient<RealtimeSocket, RealtimeChannel>
     /// Sets the JWT access token used for channel subscription authorization and Realtime RLS.
     /// Ref: https://github.com/supabase/realtime-js/pull/117 | https://github.com/supabase/realtime-js/pull/117
     /// </summary>
-    /// <param name="jwt"></param>
-    public void SetAuth(string jwt)
+    /// <param name="jwt">The user's JWT, or null to clear it, for example after sign-out.</param>
+    public void SetAuth(string? jwt)
     {
         this.AccessToken = jwt;
+        if (jwt == null)
+            return;
 
         foreach (var channel in this.subscriptions.Values)
         {

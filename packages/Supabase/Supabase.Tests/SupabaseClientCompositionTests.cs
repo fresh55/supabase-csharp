@@ -179,7 +179,6 @@ public class SupabaseClientCompositionTests
     }
 
     [TestMethod]
-    [DataRow(AuthState.SignedOut)]
     [DataRow(AuthState.PasswordRecovery)]
     [DataRow(AuthState.Shutdown)]
     public void SupabaseClient_ShouldNotForwardTokenToRealtime_GivenAuthStateCarriesNoSession(AuthState state)
@@ -195,6 +194,22 @@ public class SupabaseClientCompositionTests
         client.Auth = auth;
         captured!.Invoke(auth, state);
         realtime.DidNotReceive().SetAuth(Arg.Any<string>());
+    }
+
+    [TestMethod]
+    public void SupabaseClient_ShouldClearRealtimeToken_GivenSignedOut()
+    {
+        var realtime = RealtimeSubstitute();
+        realtime.Subscriptions.Returns(new ReadOnlyDictionary<string, RealtimeChannel>(
+            new Dictionary<string, RealtimeChannel>()));
+        var auth = Substitute.For<IGotrueClient<User, Session>>();
+        var client = DiClient(realtime: realtime);
+        IGotrueClient<User, Session>.AuthEventHandler? captured = null;
+        auth.When(a => a.AddStateChangedListener(Arg.Any<IGotrueClient<User, Session>.AuthEventHandler>()))
+            .Do(call => captured = call.Arg<IGotrueClient<User, Session>.AuthEventHandler>());
+        client.Auth = auth;
+        captured!.Invoke(auth, AuthState.SignedOut);
+        realtime.Received().SetAuth(null);
     }
 
     [TestMethod]

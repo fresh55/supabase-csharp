@@ -1,1 +1,5 @@
 #nullable enable
+*REMOVED*Supabase.Realtime.Client.SetAuth(string! jwt) -> void
+*REMOVED*Supabase.Realtime.Interfaces.IRealtimeClient<TSocket, TChannel>.SetAuth(string! jwt) -> void
+Supabase.Realtime.Client.SetAuth(string? jwt) -> void
+Supabase.Realtime.Interfaces.IRealtimeClient<TSocket, TChannel>.SetAuth(string? jwt) -> void

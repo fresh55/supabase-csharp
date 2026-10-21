@@ -258,8 +258,9 @@ public class Client : ISupabaseClient<User, Session, RealtimeSocket, RealtimeCha
                 if (this.Auth.CurrentSession?.AccessToken != null)
                     this.Realtime.SetAuth(this.Auth.CurrentSession.AccessToken);
                 break;
-            // Remove Realtime Subscriptions on Auth Sign-out.
+            // Drop the user's token and the Realtime subscriptions on sign-out.
             case AuthState.SignedOut:
+                this.Realtime.SetAuth(null);
                 this.Realtime.Subscriptions.Values?.ToList().ForEach(subscription => subscription.Unsubscribe());
                 break;
             case AuthState.PasswordRecovery:
