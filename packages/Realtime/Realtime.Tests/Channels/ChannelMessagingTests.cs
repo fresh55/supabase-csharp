@@ -122,13 +122,11 @@ public class ChannelMessagingTests
         var oldHandlerFired = false;
         var newHandlerFired = new TaskCompletionSource<bool>();
         var first = this.socketClient.Channel("resubscribe");
-        first.Register(new PostgresChangesOptions("public", "todos", ListenType.Inserts));
-        first.AddPostgresChangeHandler(ListenType.Inserts, (_, _) => oldHandlerFired = true);
+        first.OnPostgresChange((_, _) => oldHandlerFired = true, ListenType.Inserts, new PostgresChangesFilter { Table = "todos" });
         await first.Subscribe();
         first.Unsubscribe();
         var second = this.socketClient.Channel("resubscribe");
-        second.Register(new PostgresChangesOptions("public", "todos", ListenType.Inserts));
-        second.AddPostgresChangeHandler(ListenType.Inserts, (_, _) => newHandlerFired.TrySetResult(true));
+        second.OnPostgresChange((_, _) => newHandlerFired.TrySetResult(true), ListenType.Inserts, new PostgresChangesFilter { Table = "todos" });
         await second.Subscribe();
         await this.restClient.Table<Todo>().Insert(new Todo { UserId = 1 });
         await newHandlerFired.Task.WaitAsync(TimeSpan.FromSeconds(10));
@@ -153,8 +151,7 @@ public class ChannelMessagingTests
     {
         var fired = new TaskCompletionSource<bool>();
         var channel = this.socketClient.Channel("same-instance");
-        channel.Register(new PostgresChangesOptions("public", "todos", ListenType.Inserts));
-        channel.AddPostgresChangeHandler(ListenType.Inserts, (_, _) => fired.TrySetResult(true));
+        channel.OnPostgresChange((_, _) => fired.TrySetResult(true), ListenType.Inserts, new PostgresChangesFilter { Table = "todos" });
         await channel.Subscribe();
         channel.Unsubscribe();
         await channel.Subscribe();
