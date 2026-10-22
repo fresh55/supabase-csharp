@@ -8,6 +8,7 @@ using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Web;
+using Supabase.Core.Attributes;
 using Supabase.Core.Diagnostics;
 using Supabase.Gotrue.Claims;
 using Supabase.Gotrue.Exceptions;
@@ -118,6 +119,7 @@ public class Client : IGotrueClient<User, Session>
     public TokenRefresh? TokenRefresh { get; private set; }
 
     /// <inheritdoc />
+    [ImplementedCapability("client.session_management.custom_storage")]
     public void SetPersistence(IGotrueSessionPersistence<Session> persistence) =>
         this.sessionPersistence = new PersistenceListener(persistence);
 
@@ -125,9 +127,11 @@ public class Client : IGotrueClient<User, Session>
     public ClientOptions Options { get; }
 
     /// <inheritdoc />
+    [ImplementedCapability("auth.session.get_user")]
     public Task<User?> GetUser(string jwt) => this.api.GetUser(jwt);
 
     /// <inheritdoc />
+    [ImplementedCapability("auth.session.subscribe_auth_events")]
     public void NotifyAuthStateChange(AuthState stateChanged) => this.InvokeStateChangedHandlers(stateChanged);
 
     /// <inheritdoc />
@@ -179,9 +183,11 @@ public class Client : IGotrueClient<User, Session>
     }
 
     /// <inheritdoc />
+    [ImplementedCapability("auth.session.get_user")]
     public User? CurrentUser => this.CurrentSession?.User;
 
     /// <inheritdoc />
+    [ImplementedCapability("auth.session.subscribe_auth_events")]
     public void AddStateChangedListener(IGotrueClient<User, Session>.AuthEventHandler authEventHandler)
     {
         if (this.authEventHandlers.Contains(authEventHandler))
@@ -192,6 +198,7 @@ public class Client : IGotrueClient<User, Session>
     }
 
     /// <inheritdoc />
+    [ImplementedCapability("auth.session.subscribe_auth_events")]
     public void RemoveStateChangedListener(IGotrueClient<User, Session>.AuthEventHandler authEventHandler)
     {
         if (!this.authEventHandlers.Contains(authEventHandler))
@@ -208,9 +215,11 @@ public class Client : IGotrueClient<User, Session>
     public bool Online { get; set; } = true;
 
     /// <inheritdoc />
+    [ImplementedCapability("auth.session.get_session")]
     public Session? CurrentSession { get; private set; }
 
     /// <inheritdoc />
+    [PartialCapability("auth.sign_in.sign_up", "API mirrors signUp, but on a session-returning sign-up (confirmations off) C# does NOT adopt the session — CurrentUser/CurrentSession stay null, so 'signed up' != 'signed in' as in JS.")]
     public Task<Session?> SignUp(string email, string password, SignUpOptions? options = null) =>
         this.SignUp(SignUpType.Email, email, password, options);
 
@@ -240,6 +249,8 @@ public class Client : IGotrueClient<User, Session>
     }
 
     /// <inheritdoc />
+    [ImplementedCapability("auth.sign_in.sign_in_with_oauth")]
+    [ImplementedCapability("auth.sign_in.sign_in_with_password")]
     public async Task<bool> SignIn(string email, SignInOptions? options = null)
     {
         using var activity = GotrueInstrumentation.Source.StartActivity(GotrueInstrumentation.Spans.SendMagicLink);
@@ -252,6 +263,7 @@ public class Client : IGotrueClient<User, Session>
     }
 
     /// <inheritdoc />
+    [ImplementedCapability("auth.sign_in.sign_in_with_id_token")]
     public async Task<Session?> SignInWithIdToken(Provider provider, string idToken, string? accessToken = null, string? nonce = null,
         string? captchaToken = null)
     {
@@ -268,6 +280,7 @@ public class Client : IGotrueClient<User, Session>
     }
 
     /// <inheritdoc />
+    [ImplementedCapability("auth.sign_in.sign_in_with_otp")]
     public async Task<PasswordlessSignInState> SignInWithOtp(SignInWithPasswordlessEmailOptions options)
     {
         using var activity = GotrueInstrumentation.Source.StartActivity(GotrueInstrumentation.Spans.SignInWithOtp);
@@ -292,12 +305,14 @@ public class Client : IGotrueClient<User, Session>
     }
 
     /// <inheritdoc />
+    [ImplementedCapability("auth.sign_in.sign_in_with_otp")]
     public Task<bool> SendMagicLink(string email, SignInOptions? options = null) => this.SignIn(email, options);
 
     /// <inheritdoc />
     public Task<Session?> SignIn(string email, string password) => this.SignIn(SignInType.Email, email, password);
 
     /// <inheritdoc />
+    [ImplementedCapability("auth.sign_in.sign_in_with_password")]
     public Task<Session?> SignInWithPassword(string email, string password) => this.SignIn(email, password);
 
     /// <inheritdoc />
@@ -373,6 +388,7 @@ public class Client : IGotrueClient<User, Session>
     }
 
     /// <inheritdoc />
+    [ImplementedCapability("auth.sign_in.sign_in_with_sso")]
     public async Task<SSOResponse?> SignInWithSSO(Guid providerId, SignInWithSSOOptions? options = null)
     {
         if (!this.Online)
@@ -393,6 +409,7 @@ public class Client : IGotrueClient<User, Session>
     }
 
     /// <inheritdoc />
+    [ImplementedCapability("auth.sign_in.sign_in_anonymously")]
     public async Task<Session?> SignInAnonymously(SignInAnonymouslyOptions? options = null)
     {
         using var activity = GotrueInstrumentation.Source.StartActivity(GotrueInstrumentation.Spans.SignInAnonymously);
@@ -407,6 +424,7 @@ public class Client : IGotrueClient<User, Session>
     }
 
     /// <inheritdoc />
+    [ImplementedCapability("auth.sign_in.verify_otp")]
     public async Task<Session?> VerifyOTP(string phone, string token, MobileOtpType type = MobileOtpType.SMS)
     {
         using var activity = GotrueInstrumentation.Source.StartActivity(GotrueInstrumentation.Spans.VerifyOtp);
@@ -445,6 +463,7 @@ public class Client : IGotrueClient<User, Session>
     }
 
     /// <inheritdoc />
+    [ImplementedCapability("auth.sign_in.verify_otp")]
     public async Task<Session?> VerifyTokenHash(string tokenHash, EmailOtpType type = EmailOtpType.Email)
     {
         using var activity = GotrueInstrumentation.Source.StartActivity(GotrueInstrumentation.Spans.VerifyTokenHash);
@@ -463,6 +482,7 @@ public class Client : IGotrueClient<User, Session>
     }
 
     /// <inheritdoc />
+    [ImplementedCapability("auth.identities.link_identity")]
     public Task<ProviderAuthState> LinkIdentity(Provider provider, SignInOptions options)
     {
         if (!this.Online)
@@ -503,6 +523,7 @@ public class Client : IGotrueClient<User, Session>
     }
 
     /// <inheritdoc />
+    [ImplementedCapability("auth.identities.unlink_identity")]
     public Task<bool> UnlinkIdentity(UserIdentity userIdentity)
     {
         if (!this.Online)
@@ -517,6 +538,7 @@ public class Client : IGotrueClient<User, Session>
     }
 
     /// <inheritdoc />
+    [ImplementedCapability("auth.session.sign_out")]
     public async Task SignOut(SignOutScope scope = SignOutScope.Global)
     {
         using var activity = GotrueInstrumentation.Source.StartActivity(GotrueInstrumentation.Spans.SignOut);
@@ -538,6 +560,7 @@ public class Client : IGotrueClient<User, Session>
     }
 
     /// <inheritdoc />
+    [ImplementedCapability("auth.session.update_user")]
     public async Task<User?> Update(UserAttributes attributes)
     {
         using var activity = GotrueInstrumentation.Source.StartActivity(GotrueInstrumentation.Spans.UpdateUser);
@@ -563,6 +586,7 @@ public class Client : IGotrueClient<User, Session>
     }
 
     /// <inheritdoc />
+    [ImplementedCapability("auth.sign_in.reauthenticate")]
     public async Task<bool> Reauthenticate()
     {
         if (this.CurrentSession == null || string.IsNullOrEmpty(this.CurrentSession.AccessToken))
@@ -578,6 +602,7 @@ public class Client : IGotrueClient<User, Session>
     }
 
     /// <inheritdoc />
+    [ImplementedCapability("auth.sign_in.send_password_reset_email")]
     public async Task<bool> ResetPasswordForEmail(string email)
     {
         var result = await this.api.ResetPasswordForEmail(email);
@@ -593,6 +618,7 @@ public class Client : IGotrueClient<User, Session>
     }
 
     /// <inheritdoc />
+    [ImplementedCapability("auth.session.refresh_session")]
     public async Task<Session?> RefreshSession()
     {
         using var activity = GotrueInstrumentation.Source.StartActivity(GotrueInstrumentation.Spans.RefreshSession);
@@ -615,6 +641,7 @@ public class Client : IGotrueClient<User, Session>
     }
 
     /// <inheritdoc />
+    [ImplementedCapability("auth.session.set_session")]
     public async Task<Session> SetSession(string accessToken, string refreshToken, bool forceAccessTokenRefresh = false)
     {
         using var activity = GotrueInstrumentation.Source.StartActivity(GotrueInstrumentation.Spans.SetSession);
@@ -722,6 +749,7 @@ public class Client : IGotrueClient<User, Session>
     }
 
     /// <inheritdoc />
+    [ImplementedCapability("auth.session.get_session")]
     public async Task<Session?> RetrieveSessionAsync()
     {
         using var activity = GotrueInstrumentation.Source.StartActivity(GotrueInstrumentation.Spans.RetrieveSession);
@@ -765,6 +793,7 @@ public class Client : IGotrueClient<User, Session>
     }
 
     /// <inheritdoc />
+    [ImplementedCapability("auth.sign_in.exchange_code_for_session")]
     public async Task<Session?> ExchangeCodeForSession(string codeVerifier, string authCode)
     {
         using var activity = GotrueInstrumentation.Source.StartActivity(GotrueInstrumentation.Spans.ExchangeCode);
@@ -798,6 +827,7 @@ public class Client : IGotrueClient<User, Session>
     }
 
     /// <inheritdoc />
+    [ImplementedCapability("auth.session.refresh_session")]
     public async Task RefreshToken(string accessToken, string refreshToken)
     {
         using var activity = GotrueInstrumentation.Source.StartActivity(GotrueInstrumentation.Spans.RefreshToken);
@@ -910,6 +940,7 @@ public class Client : IGotrueClient<User, Session>
     }
 
     /// <inheritdoc />
+    [ImplementedCapability("auth.session.get_session")]
     public void LoadSession()
     {
         if (this.sessionPersistence == null)
@@ -996,6 +1027,7 @@ public class Client : IGotrueClient<User, Session>
     public void StopAutoRefresh() => this.TokenRefresh?.Stop();
 
     /// <inheritdoc />
+    [ImplementedCapability("auth.mfa.enroll")]
     public async Task<MfaEnrollResponse?> Enroll(MfaEnrollParams mfaEnrollParams)
     {
         if (this.CurrentSession == null || string.IsNullOrEmpty(this.CurrentSession.AccessToken))
@@ -1010,6 +1042,7 @@ public class Client : IGotrueClient<User, Session>
     }
 
     /// <inheritdoc />
+    [ImplementedCapability("auth.mfa.challenge")]
     public async Task<MfaChallengeResponse?> Challenge(MfaChallengeParams mfaChallengeParams)
     {
         if (this.CurrentSession == null || string.IsNullOrEmpty(this.CurrentSession.AccessToken))
@@ -1024,6 +1057,7 @@ public class Client : IGotrueClient<User, Session>
     }
 
     /// <inheritdoc />
+    [ImplementedCapability("auth.mfa.verify")]
     public async Task<Session?> Verify(MfaVerifyParams mfaVerifyParams)
     {
         if (this.CurrentSession == null || string.IsNullOrEmpty(this.CurrentSession.AccessToken))
@@ -1053,6 +1087,7 @@ public class Client : IGotrueClient<User, Session>
     }
 
     /// <inheritdoc />
+    [ImplementedCapability("auth.mfa.challenge_and_verify")]
     public async Task<Session?> ChallengeAndVerify(MfaChallengeAndVerifyParams mfaChallengeAndVerifyParams)
     {
         if (this.CurrentSession == null || string.IsNullOrEmpty(this.CurrentSession.AccessToken))
@@ -1095,6 +1130,7 @@ public class Client : IGotrueClient<User, Session>
     }
 
     /// <inheritdoc />
+    [ImplementedCapability("auth.mfa.unenroll")]
     public async Task<MfaUnenrollResponse?> Unenroll(MfaUnenrollParams mfaUnenrollParams)
     {
         if (this.CurrentSession == null || string.IsNullOrEmpty(this.CurrentSession.AccessToken))
@@ -1109,6 +1145,7 @@ public class Client : IGotrueClient<User, Session>
     }
 
     /// <inheritdoc />
+    [ImplementedCapability("auth.mfa.list_factors")]
     public Task<MfaListFactorsResponse?> ListFactors()
     {
         if (this.CurrentSession == null || string.IsNullOrEmpty(this.CurrentSession.AccessToken))
@@ -1123,6 +1160,7 @@ public class Client : IGotrueClient<User, Session>
         return Task.FromResult(response);
     }
 
+    [ImplementedCapability("auth.mfa.get_authenticator_assurance_level")]
     public Task<MfaGetAuthenticatorAssuranceLevelResponse?> GetAuthenticatorAssuranceLevel()
     {
         if (this.CurrentSession == null || string.IsNullOrEmpty(this.CurrentSession.AccessToken))
