@@ -13,6 +13,8 @@ using Supabase.Gotrue.Claims;
 using Supabase.Gotrue.Exceptions;
 using Supabase.Gotrue.Interfaces;
 using Supabase.Gotrue.Mfa;
+using Supabase.Gotrue.Resend;
+using Supabase.Gotrue.Responses;
 using static Supabase.Gotrue.Constants;
 using static Supabase.Gotrue.Constants.AuthState;
 using static Supabase.Gotrue.Exceptions.FailureHint.Reason;
@@ -978,6 +980,9 @@ public class Client : IGotrueClient<User, Session>
 
     /// <inheritdoc />
     public void Shutdown() => this.NotifyAuthStateChange(AuthState.Shutdown);
+
+    /// <inheritdoc />
+    public Task<BaseResponse> Resend(ResendParameters resendParameters) => this.api.Resend(resendParameters);
 
     /// <inheritdoc />
     public void StartAutoRefresh()
