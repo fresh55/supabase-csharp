@@ -40,12 +40,10 @@ public class PostgresChangesHandlerTests
         int first = 0, second = 0;
         this.channel.OnPostgresChange((_, _) => first++, listenType, filter);
         this.channel.OnPostgresChange((_, _) => second++, listenType, filter);
-
         // The server answers one entry per listener; identical listeners share an id.
         var change = $$"""{"id":7,"event":"{{wireEvent}}","schema":"public","table":"todos"}""";
         await this.SubscribeAsync(change, change);
         this.socket.Receive(Insert);
-
         (first, second).Should().Be((1, 1));
     }
 
@@ -56,11 +54,9 @@ public class PostgresChangesHandlerTests
         int all = 0, inserts = 0;
         this.channel.OnPostgresChange((_, _) => all++, ListenType.All, filter);
         this.channel.OnPostgresChange((_, _) => inserts++, ListenType.Inserts, filter);
-
         await this.SubscribeAsync("""{"id":7,"event":"*","schema":"public","table":"todos"}""",
             """{"id":8,"event":"INSERT","schema":"public","table":"todos"}""");
         this.socket.Receive(Insert);
-
         (all, inserts).Should().Be((1, 1));
     }
 
