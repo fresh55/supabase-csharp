@@ -7,8 +7,8 @@ using Supabase.Realtime;
 namespace Realtime.Tests.Channels;
 
 /// <summary>
-///     The client hands out a fresh channel after the cached one is unsubscribed. Runs over a fake socket that
-///     reports itself connected, so no server is needed.
+///     The client hands out a fresh channel after the cached one is unsubscribed, and keeps its socket when
+///     connected again. Runs over a fake socket that reports itself connected, so no server is needed.
 /// </summary>
 [TestClass]
 [TestCategory("Unit")]
@@ -22,6 +22,14 @@ public class ClientChannelCacheTests
         var socket = new FakeWebsocketClient { OpenOnStart = true };
         this.client = new Client("ws://localhost/socket", new ClientOptions { WebSocketFactory = new FakeWebSocketFactory(socket) });
         await this.client.ConnectAsync();
+    }
+
+    [TestMethod]
+    public async Task ConnectAsync_ShouldKeepTheSocket_GivenAlreadyConnected()
+    {
+        var channel = this.client.Channel("room");
+        await this.client.ConnectAsync();
+        channel.Socket.Should().BeSameAs(this.client.Socket, "a second ConnectAsync must not replace the open socket");
     }
 
     [TestMethod]
