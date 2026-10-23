@@ -123,7 +123,7 @@ public class Client : IRealtimeClient<RealtimeSocket, RealtimeChannel>
         if (this.Socket != null)
         {
             Debugger.Instance.Log(this, "Calling `ConnectAsync` on an instance that already has a `Socket`");
-            tsc.SetResult(this);
+            return this;
         }
 
         this.Socket = new RealtimeSocket(this.realtimeUrl, this.Options);
