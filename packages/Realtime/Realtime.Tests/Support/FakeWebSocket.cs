@@ -62,7 +62,17 @@ internal sealed class FakeWebsocketClient : IWebsocketClient
         return Task.FromResult(true);
     }
 
-    public bool Send(string message) => true;
+    /// <summary>Completes when the socket sends its first frame, the heartbeat that starts on open.</summary>
+    public TaskCompletionSource FirstSend { get; } = new();
+
+    public bool Send(string message)
+    {
+        this.FirstSend.TrySetResult();
+        return true;
+    }
+
+    /// <summary>Delivers a frame as if the server had sent it.</summary>
+    public void Receive(string json) => this.messageReceived.OnNext(ResponseMessage.TextMessage(json));
 
     public void Dispose() { }
 
