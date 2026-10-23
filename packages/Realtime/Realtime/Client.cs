@@ -4,6 +4,7 @@ using System.Collections.ObjectModel;
 using System.Diagnostics.CodeAnalysis;
 using System.Net.WebSockets;
 using System.Text.Json;
+using System.Threading;
 using System.Threading.Tasks;
 using Supabase.Core.Attributes;
 using Supabase.Realtime.Channel;
@@ -426,7 +427,7 @@ public class Client : IRealtimeClient<RealtimeSocket, RealtimeChannel>
     private async Task DisconnectWhenStillEmptyAsync(TimeSpan delay)
     {
         var socket = this.Socket;
-        var generation = ++this.disconnectGeneration;
+        var generation = Interlocked.Increment(ref this.disconnectGeneration);
         await Task.Delay(delay).ConfigureAwait(false);
         if (generation == this.disconnectGeneration && this.Socket == socket && this.subscriptions.Count == 0)
             this.Disconnect();
