@@ -428,7 +428,7 @@ Supabase.Storage.FileBuckets.Common.NoncurrentVersionExpiration.NewerNoncurrentV
 Supabase.Storage.FileBuckets.Common.NoncurrentVersionExpiration.NoncurrentDays.get -> int
 Supabase.Storage.FileBuckets.Common.NoncurrentVersionExpiration.NoncurrentDays.init -> void
 Supabase.Storage.FileBuckets.Common.NoncurrentVersionExpiration.NoncurrentVersionExpiration() -> void
-Supabase.Storage.FileObject.ArchivedAt.get -> System.DateTime?
+Supabase.Storage.FileObject.ArchivedAt.get -> System.DateTimeOffset?
 Supabase.Storage.FileObject.ArchivedAt.set -> void
 Supabase.Storage.FileObject.IsDeleteMarker.get -> bool?
 Supabase.Storage.FileObject.IsDeleteMarker.set -> void

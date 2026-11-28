@@ -45,7 +45,7 @@ public class FileObject
     /// <summary>When this version stopped being the current one, or null while it is current.</summary>
     [ImplementedCapability("storage.file_buckets.list_file_versions")]
     [JsonPropertyName("archived_at")]
-    public DateTime? ArchivedAt { get; set; }
+    public DateTimeOffset? ArchivedAt { get; set; }
 
     /// <summary>Whether this entry marks a deleted object rather than holding its contents.</summary>
     [ImplementedCapability("storage.file_buckets.list_file_versions")]

@@ -92,7 +92,7 @@ public class StorageFileApiContractTests
         using (new AssertionScope())
         {
             file.Version.Should().Be("v1");
-            file.ArchivedAt.Should().Be(new DateTime(2026, 11, 1, 10, 0, 0, DateTimeKind.Utc));
+            file.ArchivedAt.Should().Be(new DateTimeOffset(2026, 11, 1, 10, 0, 0, TimeSpan.Zero));
             file.IsDeleteMarker.Should().BeTrue();
             file.IsVersioned.Should().BeTrue();
         }
